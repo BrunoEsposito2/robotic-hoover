@@ -317,31 +317,76 @@ void graph_print(const Graph* g)
     }
 }
 
-Graph* graph_read_from_map(int** matrix, const int directed)
+double setWeight(int** matrix, int nodeIndex) {
+    int i, j;
+    for (i = nodeIndex - 1; i <= nodeIndex + 1; i++) {
+        for (j = nodeIndex - 1; j <= nodeIndex + 1; j++) {
+            if (matrix[i][j] == 42) {
+                return sizeof(matrix); /* ritorno un valore massimo di peso */ 
+            }
+        }
+    }
+    return 1; /* ritorno un valore minimo di peso */ 
+}
+
+Graph* graph_read_from_map(char* f, int** matrix, const int direction)
 {
-    int n, m, t, mapDim = sizeof(matrix);
-    int src, dst;
-    int i; /* numero archi letti dal file */
+    int n, m, nNodes;
+    int i, j; /* numero archi letti dal file */
     double weight;
     Graph* g;
+    FILE* file = stdin;
+    file = fopen(f, "r");
 
-    assert(mapDim > 0);
-    assert((directed == GRAPH_UNDIRECTED) || (directed == GRAPH_DIRECTED));
+    assert(file != NULL);
 
-    g = graph_create(n, t);
+    if (2 != fscanf(file, "%d %d ", &n, &m)) {
+        fprintf(stderr, "ERRORE durante la lettura dell'intestazione del grafo\n");
+        abort();
+    };
+
+    printf("n: %d \t m: %d \n", n, m);
+    assert(n > 0);
+    assert(m >= 0);
+
+    nNodes = (n - 2) * (m - 2); /* calcolo il numero totale dei nodi del grado 
+                            considerando ognuno di dimensione 3x3 */
+
+    assert(nNodes > 0);
+    assert((direction == GRAPH_UNDIRECTED) || (direction == GRAPH_DIRECTED));
+
+    g = graph_create(nNodes, direction);
     /* Ciclo di lettura degli archi. Per rendere il programma più
        robusto, meglio non fidarsi del valore `m` nell'intestazione
        dell'input. Leggiamo informazioni sugli archi fino a quando ne
        troviamo, e poi controlliamo che il numero di archi letti (i)
        sia uguale a quello dichiarato (m) */
-    i = 0;
-    while (3 == fscanf(f, "%d %d %lf", &src, &dst, &weight)) {
-        graph_add_edge(g, src, dst, weight);
-        i++;
+
+    for (i = 1; i < n - 2; i++) {
+        if (i + 2 <= n - 1) {
+            weight = setWeight(matrix, i + 1);
+            graph_add_edge(g, i, i + 1, weight);
+        }
+        if (i - 2 >= 0) {
+            weight = setWeight(matrix, i - 1);
+            graph_add_edge(g, i, i - 1, weight);
+        }
+        for (j = 2; j < m - 2; j++) {
+            if (j + 2 <= m - 1) {
+                weight = setWeight(matrix, j + 1);
+                graph_add_edge(g, j, j + 1, weight);
+            }
+            if (j - 2 >= 0) {
+                weight = setWeight(matrix, j - 1);
+                graph_add_edge(g, j, j - 1, weight);
+            }
+        }
     }
-    if (i != m) {
+
+    /*if (i != nNodes - 1) {
         fprintf(stderr, "WARNING: ho letto %d archi, ma l'intestazione ne dichiara %d\n", i, m);
-    }
+    }*/
+
     /*
     fprintf(stderr, "INFO: Letto grafo %s con %d nodi e %d archi\n",
             (t == GRAPH_UNDIRECTED) ? "non orientato" : "orientato",

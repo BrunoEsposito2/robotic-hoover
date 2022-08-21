@@ -368,20 +368,20 @@ int main(int argc, char* argv[])
     }
     */
 
-    G = graph_read_from_map(matrix, directed);
+    G = graph_read_from_map(argv[1], matrix, directed);
     n = graph_n_nodes(G);
-    /*
+    
     assert((src >= 0) && (src < n));
     p = (int*)malloc(n * sizeof(*p)); assert(p != NULL);
     d = (int*)malloc(n * sizeof(*d)); assert(d != NULL);
-    nvisited = bfs(G, src, d, p);
-    print_bfs(G, src, d, p);
+    nvisited = bfs(G, 1, d, p);
+    print_bfs(G, 1, d, p);
     printf("# %d nodi su %d raggiungibili dalla sorgente %d\n", nvisited, n, src);
     graph_destroy(G);
     free(p);
     free(d);
     if (filein != stdin) fclose(filein);
-    */
+    
 
     return EXIT_SUCCESS;
 }
