@@ -334,6 +334,7 @@ int main(int argc, char* argv[])
     int nvisited; /* n. di nodi raggiungibili dalla sorgente */
     int* p, * d;
     FILE* filein = stdin;
+    FILE* fileout = stdout;
     int src = 0, n, directed = 1;
 
     if (argc > 2) {
@@ -376,7 +377,17 @@ int main(int argc, char* argv[])
     d = (int*)malloc(n * sizeof(*d)); assert(d != NULL);
     nvisited = bfs(G, 1, d, p);
     print_bfs(G, 1, d, p);
+
     printf("# %d nodi su %d raggiungibili dalla sorgente %d\n", nvisited, n, src);
+    
+    fileout = fopen("test1.out", "w");
+    if (fileout == NULL) {
+        fprintf(stderr, "Can not open %s\n", argv[2]);
+        return EXIT_FAILURE;
+    }
+    graph_write_to_file(fileout, G);
+    graph_print(G);
+    
     graph_destroy(G);
     free(p);
     free(d);

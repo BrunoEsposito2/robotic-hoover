@@ -317,12 +317,12 @@ void graph_print(const Graph* g)
     }
 }
 
-double setWeight(int** matrix, int nodeIndex) {
+double setWeight(int** matrix, int indX, int indY) {
     int i, j;
-    for (i = nodeIndex - 1; i <= nodeIndex + 1; i++) {
-        for (j = nodeIndex - 1; j <= nodeIndex + 1; j++) {
+    for (i = indX - 1; i <= indX + 1; i++) {
+        for (j = indY - 1; j <= indY + 1; j++) {
             if (matrix[i][j] == 42) {
-                return sizeof(matrix); /* ritorno un valore massimo di peso */ 
+                return -1; /* ritorno un valore non ammissibile di peso */ 
             }
         }
     }
@@ -343,7 +343,7 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
     if (2 != fscanf(file, "%d %d ", &n, &m)) {
         fprintf(stderr, "ERRORE durante la lettura dell'intestazione del grafo\n");
         abort();
-    };
+    }
 
     printf("n: %d \t m: %d \n", n, m);
     assert(n > 0);
@@ -361,27 +361,33 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
        dell'input. Leggiamo informazioni sugli archi fino a quando ne
        troviamo, e poi controlliamo che il numero di archi letti (i)
        sia uguale a quello dichiarato (m) */
-
+    printf("prima");
     for (i = 1; i < n - 2; i++) {
-        if (i + 2 <= n - 1) {
-            weight = setWeight(matrix, i + 1);
-            graph_add_edge(g, i, i + 1, weight);
+        j = i;
+        if (i + 2 <= n - 1) { /* guardo a EST */ 
+            weight = setWeight(matrix, i + 1, j);
+            graph_add_edge(g, i + 1, j, weight);
         }
-        if (i - 2 >= 0) {
-            weight = setWeight(matrix, i - 1);
-            graph_add_edge(g, i, i - 1, weight);
-        }
-        for (j = 2; j < m - 2; j++) {
-            if (j + 2 <= m - 1) {
-                weight = setWeight(matrix, j + 1);
-                graph_add_edge(g, j, j + 1, weight);
-            }
-            if (j - 2 >= 0) {
-                weight = setWeight(matrix, j - 1);
-                graph_add_edge(g, j, j - 1, weight);
-            }
+        if (j + 2 <= m - 1) { /* guardo a SUD */ 
+            weight = setWeight(matrix, i, j + 1);
+            graph_add_edge(g, i, j + 1, weight);
         }
     }
+
+    for (j = 1; j < m - 2; j++) {
+        i = j;
+        if (i - 2 <= n - 1) { /* guardo a OVEST */ 
+            weight = setWeight(matrix, i - 1, j);
+            graph_add_edge(g, i - 1, j, weight);
+        }
+        printf("QUI");
+        if (j - 2 <= m - 1) { /* guardo a NORD */ 
+            weight = setWeight(matrix, i, j - 1);
+            graph_add_edge(g, i, j - 1, weight);
+        }
+    }
+
+    printf("dopo");
 
     /*if (i != nNodes - 1) {
         fprintf(stderr, "WARNING: ho letto %d archi, ma l'intestazione ne dichiara %d\n", i, m);
