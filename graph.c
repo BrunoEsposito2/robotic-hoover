@@ -366,23 +366,31 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
        troviamo, e poi controlliamo che il numero di archi letti (i)
        sia uguale a quello dichiarato (m) */
 
-    for (i = 1, j = 1; i < n - 2 && j < m - 2; i++, j++) {
-        if (i + 2 <= n - 1) { /* guardo a SUD */ 
+    i = 1;
+    j = 1;
+    while (i < n - 1 && j < m) {
+        if (j == m - 1) {
+            j = 1;
+            i++;
+        }
+        printf("i: %d \t j: %d \n", i, j);
+        if (i + 2 <= n - 1) { /* guardo a SUD */
             weight = setWeight(matrix, i + 1, j);
             graph_add_edge(g, i, j, i + 1, j, weight);
-        }
-        if (j + 2 <= m - 1) { /* guardo a EST */ 
-            weight = setWeight(matrix, i, j + 1);
-            graph_add_edge(g, i, j, i, j + 1, weight);
         }
         if (i - 2 >= 0) { /* guardo a OVEST */
             weight = setWeight(matrix, i - 1, j);
             graph_add_edge(g, i, j, i - 1, j, weight);
         }
+        if (j + 2 <= m - 1) { /* guardo a EST */
+            weight = setWeight(matrix, i, j + 1);
+            graph_add_edge(g, i, j, i, j + 1, weight);
+        }
         if (j - 2 >= 0) { /* guardo a NORD */
             weight = setWeight(matrix, i, j - 1);
             graph_add_edge(g, i, j, i, j - 1, weight);
         }
+        j++;
     }
 
     /*if (i != nNodes - 1) {

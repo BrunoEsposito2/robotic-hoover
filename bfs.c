@@ -197,19 +197,19 @@ int bfs(const Graph* g,
     List* l;
     int nvisited = 0;
     int i;
-    Color* color = (Color*)malloc(n * sizeof(*color));
+    /* Color* color = (Color*)malloc(n * sizeof(*color)); */
 
-    assert(color != NULL);
+    /* assert(color != NULL); */
     assert((s >= 0) && (s < n));
 
     for (i = 0; i < n; i++) {
         d[i] = -1;
         p[i] = NODE_UNDEF;
-        color[i] = WHITE;
+        /* color[i] = WHITE; */
     }
 
     d[s] = 0;
-    color[s] = GREY;
+    /* color[s] = GREY; */
     l = list_create();
     list_add_first(l, s);
 
@@ -219,18 +219,23 @@ int bfs(const Graph* g,
         nvisited++;
         for (edge = graph_adj(g, u); edge != NULL; edge = edge->next) {
             const int v = edge->dst[0];
-            /* assert(u == edge->src[0]); */
-            if (color[v] == WHITE) { /* il nodo v non è ancora stato visitato */
-                color[v] = GREY;
+            assert(u == edge->src[0]); 
+            if (d[v] == 0) {
                 d[v] = d[u] + 1;
                 p[v] = u;
                 list_add_last(l, v);
             }
+            /*if (color[v] == WHITE) {*/ /* il nodo v non è ancora stato visitato */
+                /*color[v] = GREY;
+                d[v] = d[u] + 1;
+                p[v] = u;
+                list_add_last(l, v);
+            }*/
         }
-        color[u] = BLACK;
+        /* color[u] = BLACK; */
     }
     list_destroy(l);
-    free(color);
+    /* free(color); */
     return nvisited;
 }
 
