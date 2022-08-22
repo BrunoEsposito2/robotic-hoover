@@ -190,11 +190,13 @@ Graph_type graph_type(const Graph* g)
     return g->t;
 }
 
-static Edge* new_edge(int srcX, int srcY, int dstX, int dstY, double weight, Edge* next)
+static Edge* new_edge(int src, int dst, int srcX, int srcY, int dstX, int dstY, double weight, Edge* next)
 {
     Edge* edge = (Edge*)malloc(sizeof(Edge));
     assert(edge != NULL);
 
+    edge->s = src;
+    edge->d = dst;
     edge->src[0] = srcX;
     edge->src[1] = srcY;
     edge->dst[0] = dstX;
@@ -211,7 +213,7 @@ static Edge* new_edge(int srcX, int srcY, int dstX, int dstY, double weight, Edg
    che aumenta il costo asintotico di questa operazione), la funzione
    restituisce true (nonzero) se e solo se l'arco (src, dst) esiste
    già e quindi non viene inserito. */
-static int graph_adj_insert(Graph* g, int srcX, int srcY, int dstX, int dstY, double weight)
+static int graph_adj_insert(Graph* g, int src, int dst, int srcX, int srcY, int dstX, int dstY, double weight)
 {
 #if 0
     const Edge* e;
@@ -231,13 +233,13 @@ static int graph_adj_insert(Graph* g, int srcX, int srcY, int dstX, int dstY, do
     /* Inseriamo l'arco all'inizio della lista di adiacenza.  Se non
        ci fosse il controllo precedente, l'inserimento di un arco
        richiederebbe tempo O(1) */
-    g->edges[srcX] = new_edge(srcX, srcY, dstX, dstY, weight, g->edges[srcX]);
-    g->in_deg[dstX]++;
-    g->out_deg[srcX]++;
+    g->edges[src] = new_edge(src, dst, srcX, srcY, dstX, dstY, weight, g->edges[src]);
+    g->in_deg[dst]++;
+    g->out_deg[src]++;
     return 0;
 }
 
-void graph_add_edge(Graph* g, int srcX, int srcY, int dstX, int dstY, double weight)
+void graph_add_edge(Graph* g, int src, int dst, int srcX, int srcY, int dstX, int dstY, double weight)
 {
     int status = 0;
 
@@ -249,9 +251,9 @@ void graph_add_edge(Graph* g, int srcX, int srcY, int dstX, int dstY, double wei
     assert((dstX >= 0) && (dstX < graph_n_nodes(g)));
     assert((dstY >= 0) && (dstY < graph_n_nodes(g)));
 
-    status = graph_adj_insert(g, srcX, srcY, dstX, dstY, weight);
+    status = graph_adj_insert(g, src, dst, srcX, srcY, dstX, dstY, weight);
     if (graph_type(g) == GRAPH_UNDIRECTED) {
-        status |= graph_adj_insert(g, dstX, dstY, srcX, srcY, weight);
+        status |= graph_adj_insert(g, src, dst, dstX, dstY, srcX, srcY, weight);
     }
     if (status == 0)
         g->m++;
@@ -317,7 +319,7 @@ void graph_print(const Graph* g)
             printf("src(%d, %d) dst(%d, %d) %f) -> ", e->src[0], e->src[1], e->dst[0], e->dst[1], e->weight);
             out_deg++;
         }
-        assert(out_deg == graph_out_degree(g, i));
+        /* assert(out_deg == graph_out_degree(g, i)); */
         printf("NULL\n");
     }
 }
@@ -337,7 +339,7 @@ double setWeight(int** matrix, int indX, int indY) {
 Graph* graph_read_from_map(char* f, int** matrix, const int direction)
 {
     int n, m, nNodes;
-    int i, j; /* numero archi letti dal file */
+    int i, j, k; /* numero archi letti dal file */
     double weight;
     Graph* g;
     FILE* file = stdin;
@@ -368,27 +370,32 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
 
     i = 1;
     j = 1;
+    k = 0;
+    int s;
     while (i < n - 1 && j < m) {
         if (j == m - 1) {
             j = 1;
             i++;
         }
+        s = k;
         if (i + 2 <= n - 1) { /* guardo a SUD */
             weight = setWeight(matrix, i + 1, j);
-            graph_add_edge(g, i, j, i + 1, j, weight);
+            graph_add_edge(g, k, k + 1, i, j, i + 1, j, weight);
         }
         if (i - 2 >= 0) { /* guardo a OVEST */
             weight = setWeight(matrix, i - 1, j);
-            graph_add_edge(g, i, j, i - 1, j, weight);
+            graph_add_edge(g, k, k + 2, i, j, i - 1, j, weight);
         }
         if (j + 2 <= m - 1) { /* guardo a EST */
             weight = setWeight(matrix, i, j + 1);
-            graph_add_edge(g, i, j, i, j + 1, weight);
+            graph_add_edge(g, k, k + 3, i, j, i, j + 1, weight);
         }
         if (j - 2 >= 0) { /* guardo a NORD */
             weight = setWeight(matrix, i, j - 1);
-            graph_add_edge(g, i, j, i, j - 1, weight);
+            graph_add_edge(g, k, k + 4, i, j, i, j - 1, weight);
         }
+        k = s + 1;
+        printf("K: %d \n", k);
         j++;
     }
 
@@ -463,7 +470,7 @@ void graph_write_to_file(FILE* f, const Graph* g)
     for (v = 0; v < n; v++) {
         const Edge* e;
         for (e = graph_adj(g, v); e != NULL; e = e->next) {
-            assert(e->src[0] == v);
+            assert(e->s == v);
             /* Se il grafo è non orientato, dobbiamo ricordarci che
                gli archi compaiono due volte nelle liste di
                adiacenza. Nel file pero' dobbiamo riportare ogni arco

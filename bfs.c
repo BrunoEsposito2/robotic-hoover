@@ -218,10 +218,10 @@ int bfs(const Graph* g,
         const Edge* edge;
         nvisited++;
         for (edge = graph_adj(g, u); edge != NULL; edge = edge->next) {
-            const int v = edge->dst[0];
-            assert(u == edge->src[0]); 
-            printf("VEDIAMO src(% d, % d) dst(% d, % d) \t d[%d] = %d \n", edge->src[0], edge->src[1], edge->dst[0], edge->dst[1], v, d[v]);
-            if (d[v] == 0) {
+            const int v = edge->d;
+            assert(u == edge->s); 
+            printf("VEDIAMO s: %d d: %d src(% d, % d) dst(% d, % d) \t d[%d] = %d \n", edge->s, edge->d, edge->src[0], edge->src[1], edge->dst[0], edge->dst[1], v, d[v]);
+            if (d[v] < 0 && edge->weight > -1) {
                 d[v] = d[u] + 1;
                 p[v] = u;
                 list_add_last(l, v);
@@ -381,8 +381,8 @@ int main(int argc, char* argv[])
     assert((src >= 0) && (src < n));
     p = (int*)malloc(n * sizeof(*p)); assert(p != NULL);
     d = (int*)malloc(n * sizeof(*d)); assert(d != NULL);
-    nvisited = bfs(G, 1, d, p);
-    print_bfs(G, 1, d, p);
+    nvisited = bfs(G, 0, d, p);
+    print_bfs(G, 0, d, p);
 
     printf("# %d nodi su %d raggiungibili dalla sorgente %d\n", nvisited, n, src);
     

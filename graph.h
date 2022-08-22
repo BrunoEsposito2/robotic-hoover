@@ -26,6 +26,8 @@
 
 /* struttura arco */
 typedef struct Edge {
+    int s;
+    int d;
     int src[2];            /* nodo sorgente        */
     int dst[2];            /* nodo destinazione    */
     double weight;      /* peso dell'arco       */
@@ -61,7 +63,7 @@ Graph_type graph_type(const Graph *g);
    anche se nella soluzione fornita viene fatto). Nel caso di grafo
    non orientato, occorre aggiungere l'arco sia nella lista di
    adiacenza di `src` che in quella di `dst`. */
-void graph_add_edge(Graph *g, int srcX, int srcY, int dstX, int dstY, double weight);
+void graph_add_edge(Graph *g, int src, int dst, int srcX, int srcY, int dstX, int dstY, double weight);
 
 /* Restituisce un puntatore al primo arco della lista di adiacenza
    associata al nodo `v` (`NULL` se la lista è vuota) */
