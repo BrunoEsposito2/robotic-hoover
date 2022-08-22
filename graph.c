@@ -373,7 +373,6 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
             j = 1;
             i++;
         }
-        printf("i: %d \t j: %d \n", i, j);
         if (i + 2 <= n - 1) { /* guardo a SUD */
             weight = setWeight(matrix, i + 1, j);
             graph_add_edge(g, i, j, i + 1, j, weight);
@@ -464,7 +463,7 @@ void graph_write_to_file(FILE* f, const Graph* g)
     for (v = 0; v < n; v++) {
         const Edge* e;
         for (e = graph_adj(g, v); e != NULL; e = e->next) {
-            /* assert(e->src == v); */
+            assert(e->src[0] == v);
             /* Se il grafo è non orientato, dobbiamo ricordarci che
                gli archi compaiono due volte nelle liste di
                adiacenza. Nel file pero' dobbiamo riportare ogni arco

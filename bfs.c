@@ -196,7 +196,7 @@ int bfs(const Graph* g,
     const int n = graph_n_nodes(g);
     List* l;
     int nvisited = 0;
-    int i;
+    int i, j;
     /* Color* color = (Color*)malloc(n * sizeof(*color)); */
 
     /* assert(color != NULL); */
@@ -220,6 +220,7 @@ int bfs(const Graph* g,
         for (edge = graph_adj(g, u); edge != NULL; edge = edge->next) {
             const int v = edge->dst[0];
             assert(u == edge->src[0]); 
+            printf("VEDIAMO src(% d, % d) dst(% d, % d) \t d[%d] = %d \n", edge->src[0], edge->src[1], edge->dst[0], edge->dst[1], v, d[v]);
             if (d[v] == 0) {
                 d[v] = d[u] + 1;
                 p[v] = u;
