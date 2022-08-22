@@ -220,8 +220,8 @@ int bfs(const Graph* g,
         for (edge = graph_adj(g, u); edge != NULL; edge = edge->next) {
             const int v = edge->d;
             assert(u == edge->s); 
-            printf("VEDIAMO s: %d d: %d src(% d, % d) dst(% d, % d) \t d[%d] = %d \n", edge->s, edge->d, edge->src[0], edge->src[1], edge->dst[0], edge->dst[1], v, d[v]);
-            if (d[v] < 0 && edge->weight > -1) {
+            printf("VEDIAMO s: %d d: %d src(% d, % d) dst(% d, % d) \t d[%d] = %d \t weight: %.4f \n", edge->s, edge->d, edge->src[0], edge->src[1], edge->dst[0], edge->dst[1], v, d[v], edge->weight);
+            if (d[v] < 0 && edge->weight > -1.0) {
                 d[v] = d[u] + 1;
                 p[v] = u;
                 list_add_last(l, v);

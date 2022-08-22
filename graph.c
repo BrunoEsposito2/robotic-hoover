@@ -319,7 +319,7 @@ void graph_print(const Graph* g)
             printf("src(%d, %d) dst(%d, %d) %f) -> ", e->src[0], e->src[1], e->dst[0], e->dst[1], e->weight);
             out_deg++;
         }
-        /* assert(out_deg == graph_out_degree(g, i)); */
+        assert(out_deg == graph_out_degree(g, i)); 
         printf("NULL\n");
     }
 }
@@ -380,19 +380,23 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
         s = k;
         if (i + 2 <= n - 1) { /* guardo a SUD */
             weight = setWeight(matrix, i + 1, j);
-            graph_add_edge(g, k, k + 1, i, j, i + 1, j, weight);
+            if (weight > 0)
+                graph_add_edge(g, k, k + 1, i, j, i + 1, j, weight);
         }
         if (i - 2 >= 0) { /* guardo a OVEST */
             weight = setWeight(matrix, i - 1, j);
-            graph_add_edge(g, k, k + 2, i, j, i - 1, j, weight);
+            if (weight > 0)
+                graph_add_edge(g, k, k + 2, i, j, i - 1, j, weight);
         }
         if (j + 2 <= m - 1) { /* guardo a EST */
             weight = setWeight(matrix, i, j + 1);
-            graph_add_edge(g, k, k + 3, i, j, i, j + 1, weight);
+            if (weight > 0)
+                graph_add_edge(g, k, k + 3, i, j, i, j + 1, weight);
         }
         if (j - 2 >= 0) { /* guardo a NORD */
             weight = setWeight(matrix, i, j - 1);
-            graph_add_edge(g, k, k + 4, i, j, i, j - 1, weight);
+            if (weight > 0)
+                graph_add_edge(g, k, k + 4, i, j, i, j - 1, weight);
         }
         k = s + 1;
         printf("K: %d \n", k);
