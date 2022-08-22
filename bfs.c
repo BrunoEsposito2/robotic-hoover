@@ -218,8 +218,8 @@ int bfs(const Graph* g,
         const Edge* edge;
         nvisited++;
         for (edge = graph_adj(g, u); edge != NULL; edge = edge->next) {
-            const int v = edge->dst;
-            assert(u == edge->src);
+            const int v = edge->dst[0];
+            /* assert(u == edge->src[0]); */
             if (color[v] == WHITE) { /* il nodo v non è ancora stato visitato */
                 color[v] = GREY;
                 d[v] = d[u] + 1;

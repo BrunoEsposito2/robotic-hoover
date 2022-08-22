@@ -190,13 +190,15 @@ Graph_type graph_type(const Graph* g)
     return g->t;
 }
 
-static Edge* new_edge(int src, int dst, double weight, Edge* next)
+static Edge* new_edge(int srcX, int srcY, int dstX, int dstY, double weight, Edge* next)
 {
     Edge* edge = (Edge*)malloc(sizeof(Edge));
     assert(edge != NULL);
 
-    edge->src = src;
-    edge->dst = dst;
+    edge->src[0] = srcX;
+    edge->src[1] = srcY;
+    edge->dst[0] = dstX;
+    edge->dst[1] = dstY;
     edge->weight = weight;
     edge->next = next;
     return edge;
@@ -209,7 +211,7 @@ static Edge* new_edge(int src, int dst, double weight, Edge* next)
    che aumenta il costo asintotico di questa operazione), la funzione
    restituisce true (nonzero) se e solo se l'arco (src, dst) esiste
    già e quindi non viene inserito. */
-static int graph_adj_insert(Graph* g, int src, int dst, double weight)
+static int graph_adj_insert(Graph* g, int srcX, int srcY, int dstX, int dstY, double weight)
 {
 #if 0
     const Edge* e;
@@ -229,29 +231,32 @@ static int graph_adj_insert(Graph* g, int src, int dst, double weight)
     /* Inseriamo l'arco all'inizio della lista di adiacenza.  Se non
        ci fosse il controllo precedente, l'inserimento di un arco
        richiederebbe tempo O(1) */
-    g->edges[src] = new_edge(src, dst, weight, g->edges[src]);
-    g->in_deg[dst]++;
-    g->out_deg[src]++;
+    g->edges[srcX] = new_edge(srcX, srcY, dstX, dstY, weight, g->edges[dstX]);
+    g->in_deg[dstX]++;
+    g->out_deg[srcX]++;
     return 0;
 }
 
-void graph_add_edge(Graph* g, int src, int dst, double weight)
+void graph_add_edge(Graph* g, int srcX, int srcY, int dstX, int dstY, double weight)
 {
     int status = 0;
 
     assert(g != NULL);
 
-    assert((src >= 0) && (src < graph_n_nodes(g)));
-    assert((dst >= 0) && (dst < graph_n_nodes(g)));
+    assert((srcX >= 0) && (srcX < graph_n_nodes(g)));
+    assert((srcY >= 0) && (srcY < graph_n_nodes(g)));
 
-    status = graph_adj_insert(g, src, dst, weight);
+    assert((dstX >= 0) && (dstX < graph_n_nodes(g)));
+    assert((dstY >= 0) && (dstY < graph_n_nodes(g)));
+
+    status = graph_adj_insert(g, srcX, srcY, dstX, dstY, weight);
     if (graph_type(g) == GRAPH_UNDIRECTED) {
-        status |= graph_adj_insert(g, dst, src, weight);
+        status |= graph_adj_insert(g, dstX, dstY, srcX, srcY, weight);
     }
     if (status == 0)
         g->m++;
     else
-        fprintf(stderr, "Ho ignorato l'arco duplicato (%d,%d)\n", src, dst);
+        fprintf(stderr, "Ho ignorato l'arco duplicato ((%d, %d), (%d, %d))\n", srcX, srcY, dstX, dstY);
 }
 
 int graph_n_nodes(const Graph* g)
@@ -309,7 +314,7 @@ void graph_print(const Graph* g)
                             correttezza dei gradi uscenti */
         printf("[%2d] -> ", i);
         for (e = graph_adj(g, i); e != NULL; e = e->next) {
-            printf("(%d, %d, %f) -> ", e->src, e->dst, e->weight);
+            printf("src(%d, %d) dst(%d, %d) %f) -> ", e->src[0], e->src[1], e->dst[0], e->dst[1], e->weight);
             out_deg++;
         }
         assert(out_deg == graph_out_degree(g, i));
@@ -345,7 +350,6 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
         abort();
     }
 
-    printf("n: %d \t m: %d \n", n, m);
     assert(n > 0);
     assert(m >= 0);
 
@@ -361,33 +365,25 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
        dell'input. Leggiamo informazioni sugli archi fino a quando ne
        troviamo, e poi controlliamo che il numero di archi letti (i)
        sia uguale a quello dichiarato (m) */
-    printf("prima");
-    for (i = 1; i < n - 2; i++) {
-        j = i;
-        if (i + 2 <= n - 1) { /* guardo a EST */ 
+
+    for (i = 1, j = 1; i < n - 2 && j < m - 2; i++, j++) {
+        if (i + 2 <= n - 1) { /* guardo a SUD */ 
             weight = setWeight(matrix, i + 1, j);
-            graph_add_edge(g, i + 1, j, weight);
+            graph_add_edge(g, i, j, i + 1, j, weight);
         }
-        if (j + 2 <= m - 1) { /* guardo a SUD */ 
+        if (j + 2 <= m - 1) { /* guardo a EST */ 
             weight = setWeight(matrix, i, j + 1);
-            graph_add_edge(g, i, j + 1, weight);
+            graph_add_edge(g, i, j, i, j + 1, weight);
         }
-    }
-
-    for (j = 1; j < m - 2; j++) {
-        i = j;
-        if (i - 2 <= n - 1) { /* guardo a OVEST */ 
+        if (i - 2 >= 0) { /* guardo a OVEST */
             weight = setWeight(matrix, i - 1, j);
-            graph_add_edge(g, i - 1, j, weight);
+            graph_add_edge(g, i, j, i - 1, j, weight);
         }
-        printf("QUI");
-        if (j - 2 <= m - 1) { /* guardo a NORD */ 
+        if (j - 2 >= 0) { /* guardo a NORD */
             weight = setWeight(matrix, i, j - 1);
-            graph_add_edge(g, i, j - 1, weight);
+            graph_add_edge(g, i, j, i, j - 1, weight);
         }
     }
-
-    printf("dopo");
 
     /*if (i != nNodes - 1) {
         fprintf(stderr, "WARNING: ho letto %d archi, ma l'intestazione ne dichiara %d\n", i, m);
@@ -429,7 +425,7 @@ Graph* graph_read_from_file(FILE* f)
        sia uguale a quello dichiarato (m) */
     i = 0;
     while (3 == fscanf(f, "%d %d %lf", &src, &dst, &weight)) {
-        graph_add_edge(g, src, dst, weight);
+        /* graph_add_edge(g, src, dst, weight); */
         i++;
     }
     if (i != m) {
@@ -460,7 +456,7 @@ void graph_write_to_file(FILE* f, const Graph* g)
     for (v = 0; v < n; v++) {
         const Edge* e;
         for (e = graph_adj(g, v); e != NULL; e = e->next) {
-            assert(e->src == v);
+            /* assert(e->src == v); */
             /* Se il grafo è non orientato, dobbiamo ricordarci che
                gli archi compaiono due volte nelle liste di
                adiacenza. Nel file pero' dobbiamo riportare ogni arco
@@ -471,7 +467,7 @@ void graph_write_to_file(FILE* f, const Graph* g)
                versione di ciascun arco in cui il nodo sorgente è
                minore del nodo destinazione. */
             if ((graph_type(g) == GRAPH_DIRECTED) || (e->src < e->dst)) {
-                fprintf(f, "%d %d %f\n", e->src, e->dst, e->weight);
+                fprintf(f, "src(%d, %d) dst(%d, %d) %f\n", e->src[0], e->src[1], e->dst[0], e->dst[1], e->weight);
             }
         }
     }
