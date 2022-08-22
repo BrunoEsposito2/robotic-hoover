@@ -231,7 +231,7 @@ static int graph_adj_insert(Graph* g, int srcX, int srcY, int dstX, int dstY, do
     /* Inseriamo l'arco all'inizio della lista di adiacenza.  Se non
        ci fosse il controllo precedente, l'inserimento di un arco
        richiederebbe tempo O(1) */
-    g->edges[srcX] = new_edge(srcX, srcY, dstX, dstY, weight, g->edges[dstX]);
+    g->edges[srcX] = new_edge(srcX, srcY, dstX, dstY, weight, g->edges[srcX]);
     g->in_deg[dstX]++;
     g->out_deg[srcX]++;
     return 0;
