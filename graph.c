@@ -399,10 +399,9 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
             i++;
         }
         s = k;
-        weightSrc = setWeight(matrix, i, j);
         if (i + 2 <= n - 1) { /* guardo a SUD */
             weightDst = setWeight(matrix, i + 1, j);
-            if (weightSrc > 0 && weightDst > 0) {
+            if (weightDst > 0) {
                 if (vals[i][j] == -1) {
                     vals[i][j] = k;
                 }
@@ -414,7 +413,7 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
         }
         if (i - 2 >= 0) { /* guardo a OVEST */
             weightDst = setWeight(matrix, i - 1, j);
-            if (weightSrc > 0 && weightDst > 0) {
+            if (weightDst > 0) {
                 if (vals[i][j] == -1) {
                     vals[i][j] = k;
                 }
@@ -426,7 +425,7 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
         }
         if (j + 2 <= m - 1) { /* guardo a EST */
             weightDst = setWeight(matrix, i, j + 1);
-            if (weightSrc > 0 && weightDst > 0) {
+            if (weightDst > 0) {
                 if (vals[i][j] == -1) {
                     vals[i][j] = k;
                 }
@@ -438,7 +437,7 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
         }
         if (j - 2 >= 0) { /* guardo a NORD */
             weightDst = setWeight(matrix, i, j - 1);
-            if (weightSrc > 0 && weightDst > 0) {
+            if (weightDst > 0) {
                 if (vals[i][j] == -1) {
                     vals[i][j] = k;
                 }
