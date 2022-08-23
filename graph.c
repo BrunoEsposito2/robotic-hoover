@@ -336,6 +336,12 @@ double setWeight(int** matrix, int indX, int indY) {
     return 1; /* ritorno un valore minimo di peso */ 
 }
 
+void create_matr(int** arr, size_t rows, size_t cols) {
+    int i;
+    for (i = 0; i < rows; i++)
+        arr[i] = malloc(sizeof * arr[i] * cols);
+}
+
 Graph* graph_read_from_map(char* f, int** matrix, const int direction)
 {
     int n, m, nNodes;
@@ -370,8 +376,23 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
 
     i = 1;
     j = 1;
-    k = 0;
+    k = 1;
     int s;
+    int** vals = malloc(sizeof * vals * n);
+
+    create_matr(vals, n, m);
+
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < m; j++) {
+            if (vals)
+                vals[i][j] = -1;
+        }
+    }
+
+    i = 1;
+    j = 1;
+    k = 0;
+    
     while (i < n - 1 && j < m) {
         if (j == m - 1) {
             j = 1;
@@ -381,27 +402,61 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
         weightSrc = setWeight(matrix, i, j);
         if (i + 2 <= n - 1) { /* guardo a SUD */
             weightDst = setWeight(matrix, i + 1, j);
-            if (weightSrc > 0 && weightDst > 0)
-                graph_add_edge(g, k, k + 1, i, j, i + 1, j, weightDst);
+            if (weightSrc > 0 && weightDst > 0) {
+                if (vals[i][j] == -1) {
+                    vals[i][j] = k;
+                }
+                if (vals[i + 1][j] == -1) {
+                    vals[i + 1][j] = k + 1;
+                }
+                graph_add_edge(g, vals[i][j], vals[i+1][j], i, j, i + 1, j, weightDst);
+            }
         }
         if (i - 2 >= 0) { /* guardo a OVEST */
             weightDst = setWeight(matrix, i - 1, j);
-            if (weightSrc > 0 && weightDst > 0)
-                graph_add_edge(g, k, k + 2, i, j, i - 1, j, weightDst);
+            if (weightSrc > 0 && weightDst > 0) {
+                if (vals[i][j] == -1) {
+                    vals[i][j] = k;
+                }
+                if (vals[i - 1][j] == -1) {
+                    vals[i - 1][j] = k + 1;
+                }
+                graph_add_edge(g, vals[i][j], vals[i + 1][j], i, j, i - 1, j, weightDst);
+            }
         }
         if (j + 2 <= m - 1) { /* guardo a EST */
             weightDst = setWeight(matrix, i, j + 1);
-            if (weightSrc > 0 && weightDst > 0)
-                graph_add_edge(g, k, k + 3, i, j, i, j + 1, weightDst);
+            if (weightSrc > 0 && weightDst > 0) {
+                if (vals[i][j] == -1) {
+                    vals[i][j] = k;
+                }
+                if (vals[i][j + 1] == -1) {
+                    vals[i][j + 1] = k + 1;
+                }
+                graph_add_edge(g, vals[i][j], vals[i][j + 1], i, j, i, j + 1, weightDst);
+            }
         }
         if (j - 2 >= 0) { /* guardo a NORD */
             weightDst = setWeight(matrix, i, j - 1);
-            if (weightSrc > 0 && weightDst > 0)
-                graph_add_edge(g, k, k + 4, i, j, i, j - 1, weightDst);
+            if (weightSrc > 0 && weightDst > 0) {
+                if (vals[i][j] == -1) {
+                    vals[i][j] = k;
+                }
+                if (vals[i][j - 1] == -1) {
+                    vals[i][j - 1] = k + 1;
+                }
+                graph_add_edge(g, vals[i][j], vals[i][j - 1], i, j, i, j - 1, weightDst);
+            }
         }
         k = s + 1;
         printf("K: %d \n", k);
         j++;
+    }
+
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < m; j++) {
+            printf("(%d, %d) -> %d \n", i, j, vals[i][j]);
+        }
     }
 
     /*if (i != nNodes - 1) {

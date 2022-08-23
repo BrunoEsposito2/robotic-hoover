@@ -396,7 +396,7 @@ int main(int argc, char* argv[])
     }
     graph_write_to_file(fileout, G);
     graph_print(G);
-    print_path(0, 27, p);
+    print_path(0, 56, p);
 
     graph_destroy(G);
     free(p);
