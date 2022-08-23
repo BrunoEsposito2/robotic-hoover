@@ -220,10 +220,12 @@ int bfs(const Graph* g,
         for (edge = graph_adj(g, u); edge != NULL; edge = edge->next) {
             const int v = edge->d;
             assert(u == edge->s); 
-            printf("VEDIAMO s: %d d: %d src(% d, % d) dst(% d, % d) \t d[%d] = %d \t weight: %.4f \n", edge->s, edge->d, edge->src[0], edge->src[1], edge->dst[0], edge->dst[1], v, d[v], edge->weight);
-            if (d[v] < 0 && edge->weight > -1.0) {
+            printf("VEDIAMO s: %d d: %d src(% d, % d) dst(% d, % d) \t ", edge->s, edge->d, edge->src[0], edge->src[1], edge->dst[0], edge->dst[1]);
+            if (d[v] < 0 && edge->weight > -1) {
                 d[v] = d[u] + 1;
+                printf("d[%d] = %d \t weight: %.4f \t", v, d[v], edge->weight);
                 p[v] = u;
+                printf("p[v] = %d \n", p[v]);
                 list_add_last(l, v);
             }
             /*if (color[v] == WHITE) {*/ /* il nodo v non è ancora stato visitato */
@@ -233,6 +235,7 @@ int bfs(const Graph* g,
                 list_add_last(l, v);
             }*/
         }
+        printf("\n");
         /* color[u] = BLACK; */
     }
     list_destroy(l);
@@ -393,7 +396,8 @@ int main(int argc, char* argv[])
     }
     graph_write_to_file(fileout, G);
     graph_print(G);
-    
+    print_path(0, 27, p);
+
     graph_destroy(G);
     free(p);
     free(d);

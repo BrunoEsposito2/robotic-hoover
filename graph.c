@@ -340,7 +340,7 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
 {
     int n, m, nNodes;
     int i, j, k; /* numero archi letti dal file */
-    double weight;
+    double weightSrc, weightDst;
     Graph* g;
     FILE* file = stdin;
     file = fopen(f, "r");
@@ -378,25 +378,26 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
             i++;
         }
         s = k;
+        weightSrc = setWeight(matrix, i, j);
         if (i + 2 <= n - 1) { /* guardo a SUD */
-            weight = setWeight(matrix, i + 1, j);
-            if (weight > 0)
-                graph_add_edge(g, k, k + 1, i, j, i + 1, j, weight);
+            weightDst = setWeight(matrix, i + 1, j);
+            if (weightSrc > 0 && weightDst > 0)
+                graph_add_edge(g, k, k + 1, i, j, i + 1, j, weightDst);
         }
         if (i - 2 >= 0) { /* guardo a OVEST */
-            weight = setWeight(matrix, i - 1, j);
-            if (weight > 0)
-                graph_add_edge(g, k, k + 2, i, j, i - 1, j, weight);
+            weightDst = setWeight(matrix, i - 1, j);
+            if (weightSrc > 0 && weightDst > 0)
+                graph_add_edge(g, k, k + 2, i, j, i - 1, j, weightDst);
         }
         if (j + 2 <= m - 1) { /* guardo a EST */
-            weight = setWeight(matrix, i, j + 1);
-            if (weight > 0)
-                graph_add_edge(g, k, k + 3, i, j, i, j + 1, weight);
+            weightDst = setWeight(matrix, i, j + 1);
+            if (weightSrc > 0 && weightDst > 0)
+                graph_add_edge(g, k, k + 3, i, j, i, j + 1, weightDst);
         }
         if (j - 2 >= 0) { /* guardo a NORD */
-            weight = setWeight(matrix, i, j - 1);
-            if (weight > 0)
-                graph_add_edge(g, k, k + 4, i, j, i, j - 1, weight);
+            weightDst = setWeight(matrix, i, j - 1);
+            if (weightSrc > 0 && weightDst > 0)
+                graph_add_edge(g, k, k + 4, i, j, i, j - 1, weightDst);
         }
         k = s + 1;
         printf("K: %d \n", k);
