@@ -537,3 +537,44 @@ void graph_write_to_file(FILE* f, const Graph* g)
         }
     }
 }
+
+int get_array_dim(const int* path, int n) {
+    int i, dim = 0;
+    for (i = 0; i < n; i++) {
+        if (path[i] != -1)
+            dim++;
+    }
+    return dim;
+}
+
+void path_write_to_file(FILE* f, Graph* g, const int* path) {
+    int v, n, prevX = 1, prevY = 1;
+
+    assert(path != NULL);
+    assert(f != NULL);
+
+    n = graph_n_nodes(g);
+
+    fprintf(f, "%u\n", get_array_dim(path, n));
+    for (v = 0; v < n; v++) {
+        if (path[v] > -1) {
+            const Edge* node = graph_adj(g, v);
+            if (node->src[0] > prevX && node->src[1] == prevY) {
+                fprintf(f, "->S ");
+                prevX = node->src[0];
+            }
+            else if (node->src[0] < prevX && node->src[1] == prevY) {
+                fprintf(f, "->N ");
+                prevX = node->src[0];
+            }
+            else if (node->src[1] < prevY && node->src[0] == prevX) {
+                fprintf(f, "->O ");
+                prevY = node->src[1];
+            }
+            else if (node->src[1] > prevY && node->src[0] == prevX) {
+                fprintf(f, "->E ");
+                prevY = node->src[1];
+            }
+        }
+    }
+}

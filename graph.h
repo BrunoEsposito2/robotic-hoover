@@ -88,11 +88,13 @@ void graph_print(const Graph *g);
    deve essere già stato aperto in lettura. */
 Graph *graph_read_from_file(FILE *f);
 
-Graph* graph_read_from_map(char* f, int** matrix, const int direction);
-
 /* Salva il grafo `g` sul file `f`, con lo stesso formato usato dalla
    funzione `graph_read_from_file()`. Il file `f` deve essere già
    stato aperto in scrittura. */
 void graph_write_to_file(FILE *f, const Graph *g);
+
+Graph* graph_read_from_map(char* f, int** matrix, const int direction);
+
+void path_write_to_file(FILE* f, Graph* g, const int* path);
 
 #endif

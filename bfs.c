@@ -197,19 +197,15 @@ int bfs(const Graph* g,
     List* l;
     int nvisited = 0;
     int i;
-    /* Color* color = (Color*)malloc(n * sizeof(*color)); */
 
-    /* assert(color != NULL); */
     assert((s >= 0) && (s < n));
 
     for (i = 0; i < n; i++) {
         d[i] = -1;
         p[i] = NODE_UNDEF;
-        /* color[i] = WHITE; */
     }
 
     d[s] = 0;
-    /* color[s] = GREY; */
     l = list_create();
     list_add_first(l, s);
 
@@ -228,18 +224,10 @@ int bfs(const Graph* g,
                 printf("p[v] = %d \n", p[v]);
                 list_add_last(l, v);
             }
-            /*if (color[v] == WHITE) {*/ /* il nodo v non è ancora stato visitato */
-                /*color[v] = GREY;
-                d[v] = d[u] + 1;
-                p[v] = u;
-                list_add_last(l, v);
-            }*/
         }
         printf("\n");
-        /* color[u] = BLACK; */
     }
     list_destroy(l);
-    /* free(color); */
     return nvisited;
 }
 
@@ -251,15 +239,14 @@ int bfs(const Graph* g,
 
    dove n1, n2... sono gli interi che individuano i nodi
    attraversati. */
-void print_path(int s, int d, const int* p, int* path)
+void print_path(int s, int d, const int* p)
 {
     if (s == d)
         printf("%d", s);
     else if (p[d] < 0)
         printf("Non raggiungibile");
     else {
-        path[d] = d;
-        print_path(s, p[d], p, path);
+        print_path(s, p[d], p);
         printf("->%d", d);
     }
 }
@@ -269,7 +256,7 @@ void print_path(int s, int d, const int* p, int* path)
    prodotti dalla visita in ampiezza. L'array `p[]` indica l'array dei
    predecessori, cioè `p[i]` è il predecessore del nodo `i`
    nell'albero corrispondente alla visita BFS. */
-void print_bfs(const Graph* g, int src, const int* d, const int* p, int* path)
+void print_bfs(const Graph* g, int src, const int* d, const int* p)
 {
     const int n = graph_n_nodes(g);
     int v;
@@ -281,18 +268,18 @@ void print_bfs(const Graph* g, int src, const int* d, const int* p, int* path)
     printf("------+------+----------+-------------------------\n");
     for (v = 0; v < n; v++) {
         printf(" %4d | %4d | %8d | ", src, v, d[v]);
-        print_path(src, v, p, path);
+        print_path(src, v, p);
         printf("\n");
     }
 }
 
-void create_matrix(int** arr, size_t rows, size_t cols) {
+void set_cols(int** arr, size_t rows, size_t cols) {
     int i;
     for (i = 0; i < rows; i++)
         arr[i] = malloc(sizeof * arr[i] * cols);
 }
 
-int** set_dimensions(FILE* f)
+int** matrix_from_file(FILE* f)
 {
     int **matrix, retValue, i, j, n, m;
     char c;
@@ -303,37 +290,44 @@ int** set_dimensions(FILE* f)
         fprintf(stderr, "ERRORE durante la lettura dell'intestazione del file\n");
         abort();
     }
+
     assert(n >= 10);
     assert(m <= 1000);
     printf("rows: %d \ncols: %d \n", n, m);
 
     matrix = malloc(sizeof * matrix * n);
-    create_matrix(matrix, n, m);
-
-    /*
-    * Debug purpose
-    *
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < m; j++) {
-            if (matrix) {
-                matrix[i][j] = 0;
-                printf("matrix[%d][%d]: %d \n", i, j, matrix[i][j]);
-            }
-        }
-    }
-    */
+    set_cols(matrix, n, m);
 
     for (i = 0; i < n; i++) {
         for (j = 0; j < m; j++) {
             retValue = fscanf(f, "%c ", &c);
             if (matrix && retValue == 1 && c != '\n') {
-                matrix[i][j] = c;
-                /* printf("matrix[%d][%d]: %d \n", i, j, matrix[i][j]); */
+                matrix[i][j] = c;   /* inizializzo la matrice con i valori letti dal file */
             }
         }
     }
 
     return matrix;
+}
+
+void init_path_array(int* path, int dim) {
+    int i;
+    for (i = 0; i < dim; i++) {
+        path[i] = -1;
+    }
+}
+
+void get_path(int s, int d, const int* p, int* path)
+{
+    if (s == d)
+        printf("%d", s);
+    else if (p[d] < 0)
+        printf("Non raggiungibile");
+    else {
+        path[d] = d;
+        get_path(s, p[d], p, path);
+        printf("->%d", d);
+    }
 }
 
 
@@ -342,10 +336,10 @@ int main(int argc, char* argv[])
     Graph* G;
     int** matrix;
     int nvisited; /* n. di nodi raggiungibili dalla sorgente */
-    int* p, * d, *c, *path;
+    int* p, * d, *path;
     FILE* filein = stdin;
     FILE* fileout = stdout;
-    int src, i, j, prevX = 1, prevY = 1, n, directed = 1;
+    int src, n, directed = 1;
 
     if (argc != 3) {
         fprintf(stderr, "Invocare il programma con: %s nodo_sorgente file_grafo\n", argv[0]);
@@ -362,65 +356,42 @@ int main(int argc, char* argv[])
         }
     }
 
-    matrix = set_dimensions(filein);
+    matrix = matrix_from_file(filein);
 
     G = graph_read_from_map(argv[2], matrix, directed);
     n = graph_n_nodes(G);
     
     assert((src >= 0) && (src < n));
+
     p = (int*)malloc(n * sizeof(*p)); assert(p != NULL);
     d = (int*)malloc(n * sizeof(*d)); assert(d != NULL);
-    c = (int*)malloc(sizeof(int)); assert(p != NULL);
     nvisited = bfs(G, src, d, p);
-    print_bfs(G, src, d, p, c);
+    print_bfs(G, src, d, p);
 
     printf("# %d nodi su %d raggiungibili dalla sorgente %d\n", nvisited, n, src);
     
+    graph_print(G);
+
+    path = (int*)malloc(n * sizeof(*path)); assert(path != NULL);
+
+    init_path_array(path, n);
+    get_path(src, 56, p, path);
+
     fileout = fopen("test1.out", "w");
     if (fileout == NULL) {
         fprintf(stderr, "Can not open %s\n", argv[2]);
         return EXIT_FAILURE;
     }
-    graph_write_to_file(fileout, G);
-    graph_print(G);
-
-    path = (int*)malloc(n * sizeof(*path)); assert(path != NULL);
-
-    for (i = 0; i < n; i++) {
-        path[i] = -1;
-    }
-    print_path(src, 56, p, path);
-
-    printf("\n");
-
-    for (j = 0; j < n; j++) {
-        if (path[j] > -1) {
-            Edge* node = graph_adj(G, j);
-            if (node->src[0] > prevX && node->src[1] == prevY) {
-                printf("S ");
-                prevX = node->src[0];
-            }
-            else if (node->src[0] < prevX && node->src[1] == prevY) {
-                printf("N ");
-                prevX = node->src[0];
-            }
-            else if (node->src[1] < prevY && node->src[0] == prevX) {
-                printf("O ");
-                prevY = node->src[1];
-            }
-            else if (node->src[1] > prevY && node->src[0] == prevX) {
-                printf("E ");
-                prevY = node->src[1];
-            }
-            printf("-> (%d, %d) ", node->src[0], node->src[1]);
-        }
-    }
-
+    /*graph_write_to_file(fileout, G);*/
+    path_write_to_file(fileout, G, path);
  
     graph_destroy(G);
+    free(matrix);
     free(p);
     free(d);
+    free(path);
     if (filein != stdin) fclose(filein);
+    if (fileout != stdout) fclose(fileout);
     
 
     return EXIT_SUCCESS;
