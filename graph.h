@@ -26,10 +26,10 @@
 
 /* struttura arco */
 typedef struct Edge {
-    int s;
-    int d;
-    int src[2];            /* nodo sorgente        */
-    int dst[2];            /* nodo destinazione    */
+    int s;                  /* nodo sorgente        */
+    int d;                  /* nodo destinazione    */
+    int src[2];            /* coordinate nodo sorgente        */
+    int dst[2];            /* coordinate nodo destinazione    */
     double weight;      /* peso dell'arco       */
     struct Edge *next;
 } Edge;
@@ -87,6 +87,8 @@ void graph_print(const Graph *g);
 /* Crea un nuovo grafo leggendone il contenuto dal file `f`. Il file `f`
    deve essere già stato aperto in lettura. */
 Graph *graph_read_from_file(FILE *f);
+
+Graph* graph_read_from_map(char* f, int** matrix, const int direction);
 
 /* Salva il grafo `g` sul file `f`, con lo stesso formato usato dalla
    funzione `graph_read_from_file()`. Il file `f` deve essere già

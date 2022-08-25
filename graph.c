@@ -345,8 +345,9 @@ void create_matr(int** arr, size_t rows, size_t cols) {
 Graph* graph_read_from_map(char* f, int** matrix, const int direction)
 {
     int n, m, nNodes;
-    int i, j, k; /* numero archi letti dal file */
-    double weightSrc, weightDst;
+    int i, j, k, s; /* numero archi letti dal file */
+    int** coordNodes;
+    double weightDst;
     Graph* g;
     FILE* file = stdin;
     file = fopen(f, "r");
@@ -374,11 +375,7 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
        troviamo, e poi controlliamo che il numero di archi letti (i)
        sia uguale a quello dichiarato (m) */
 
-    i = 1;
-    j = 1;
-    k = 1;
-    int s;
-    int **coordNodes = malloc(sizeof * coordNodes * n);
+    coordNodes = malloc(sizeof * coordNodes * n);
 
     create_matr(coordNodes, n, m);
 
@@ -399,7 +396,6 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
             i++;
         }
         s = k;
-        weightSrc = setWeight(matrix, i, j);
         if (i + 2 <= n - 1) { /* guardo a SUD */
             weightDst = setWeight(matrix, i + 1, j);
             if (weightDst > 0) {

@@ -196,7 +196,7 @@ int bfs(const Graph* g,
     const int n = graph_n_nodes(g);
     List* l;
     int nvisited = 0;
-    int i, j;
+    int i;
     /* Color* color = (Color*)malloc(n * sizeof(*color)); */
 
     /* assert(color != NULL); */
@@ -295,7 +295,7 @@ void create_matrix(int** arr, size_t rows, size_t cols) {
 int** set_dimensions(FILE* f)
 {
     int **matrix, retValue, i, j, n, m;
-    const char c;
+    char c;
 
     assert(f != NULL);
 
@@ -342,28 +342,12 @@ int main(int argc, char* argv[])
     Graph* G;
     int** matrix;
     int nvisited; /* n. di nodi raggiungibili dalla sorgente */
-    int* p, * d;
+    int* p, * d, *c, *path;
     FILE* filein = stdin;
     FILE* fileout = stdout;
-    int src = 0, n, directed = 1;
+    int src, i, j, prevX = 1, prevY = 1, n, directed = 1;
 
-    if (argc > 2) {
-        fprintf(stderr, "Invocare il programma con: %s file_grafo\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
-    if (strcmp(argv[0], "-") != 0) {
-        filein = fopen(argv[1], "r");
-        if (filein == NULL) {
-            fprintf(stderr, "Can not open %s\n", argv[2]);
-            return EXIT_FAILURE;
-        }
-    }
-
-    matrix = set_dimensions(filein);
-    src = matrix[1][1];
-
-    /*if (argc != 3) {
+    if (argc != 3) {
         fprintf(stderr, "Invocare il programma con: %s nodo_sorgente file_grafo\n", argv[0]);
         return EXIT_FAILURE;
     }
@@ -377,17 +361,18 @@ int main(int argc, char* argv[])
             return EXIT_FAILURE;
         }
     }
-    */
 
-    G = graph_read_from_map(argv[1], matrix, directed);
+    matrix = set_dimensions(filein);
+
+    G = graph_read_from_map(argv[2], matrix, directed);
     n = graph_n_nodes(G);
     
     assert((src >= 0) && (src < n));
     p = (int*)malloc(n * sizeof(*p)); assert(p != NULL);
     d = (int*)malloc(n * sizeof(*d)); assert(d != NULL);
-    int* c = (int*)malloc(sizeof(int)); assert(p != NULL);
-    nvisited = bfs(G, 0, d, p);
-    print_bfs(G, 0, d, p, c);
+    c = (int*)malloc(sizeof(int)); assert(p != NULL);
+    nvisited = bfs(G, src, d, p);
+    print_bfs(G, src, d, p, c);
 
     printf("# %d nodi su %d raggiungibili dalla sorgente %d\n", nvisited, n, src);
     
@@ -399,16 +384,15 @@ int main(int argc, char* argv[])
     graph_write_to_file(fileout, G);
     graph_print(G);
 
-    int * path = (int*)malloc(n * sizeof(*path)); assert(path != NULL);
-    int i;
+    path = (int*)malloc(n * sizeof(*path)); assert(path != NULL);
+
     for (i = 0; i < n; i++) {
         path[i] = -1;
     }
-    print_path(0, 56, p, path);
+    print_path(src, 56, p, path);
 
     printf("\n");
 
-    int j, k, prevX = 1, prevY = 1, app;
     for (j = 0; j < n; j++) {
         if (path[j] > -1) {
             Edge* node = graph_adj(G, j);
