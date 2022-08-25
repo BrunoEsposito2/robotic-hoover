@@ -251,14 +251,15 @@ int bfs(const Graph* g,
 
    dove n1, n2... sono gli interi che individuano i nodi
    attraversati. */
-void print_path(int s, int d, const int* p)
+void print_path(int s, int d, const int* p, int* path)
 {
     if (s == d)
         printf("%d", s);
     else if (p[d] < 0)
         printf("Non raggiungibile");
     else {
-        print_path(s, p[d], p);
+        path[d] = d;
+        print_path(s, p[d], p, path);
         printf("->%d", d);
     }
 }
@@ -268,7 +269,7 @@ void print_path(int s, int d, const int* p)
    prodotti dalla visita in ampiezza. L'array `p[]` indica l'array dei
    predecessori, cioè `p[i]` è il predecessore del nodo `i`
    nell'albero corrispondente alla visita BFS. */
-void print_bfs(const Graph* g, int src, const int* d, const int* p)
+void print_bfs(const Graph* g, int src, const int* d, const int* p, int* path)
 {
     const int n = graph_n_nodes(g);
     int v;
@@ -280,7 +281,7 @@ void print_bfs(const Graph* g, int src, const int* d, const int* p)
     printf("------+------+----------+-------------------------\n");
     for (v = 0; v < n; v++) {
         printf(" %4d | %4d | %8d | ", src, v, d[v]);
-        print_path(src, v, p);
+        print_path(src, v, p, path);
         printf("\n");
     }
 }
@@ -384,8 +385,9 @@ int main(int argc, char* argv[])
     assert((src >= 0) && (src < n));
     p = (int*)malloc(n * sizeof(*p)); assert(p != NULL);
     d = (int*)malloc(n * sizeof(*d)); assert(d != NULL);
+    int* c = (int*)malloc(sizeof(int)); assert(p != NULL);
     nvisited = bfs(G, 0, d, p);
-    print_bfs(G, 0, d, p);
+    print_bfs(G, 0, d, p, c);
 
     printf("# %d nodi su %d raggiungibili dalla sorgente %d\n", nvisited, n, src);
     
@@ -396,8 +398,41 @@ int main(int argc, char* argv[])
     }
     graph_write_to_file(fileout, G);
     graph_print(G);
-    print_path(0, 56, p);
 
+    int * path = (int*)malloc(n * sizeof(*path)); assert(path != NULL);
+    int i;
+    for (i = 0; i < n; i++) {
+        path[i] = -1;
+    }
+    print_path(0, 56, p, path);
+
+    printf("\n");
+
+    int j, k, prevX = 1, prevY = 1, app;
+    for (j = 0; j < n; j++) {
+        if (path[j] > -1) {
+            Edge* node = graph_adj(G, j);
+            if (node->src[0] > prevX && node->src[1] == prevY) {
+                printf("S ");
+                prevX = node->src[0];
+            }
+            else if (node->src[0] < prevX && node->src[1] == prevY) {
+                printf("N ");
+                prevX = node->src[0];
+            }
+            else if (node->src[1] < prevY && node->src[0] == prevX) {
+                printf("O ");
+                prevY = node->src[1];
+            }
+            else if (node->src[1] > prevY && node->src[0] == prevX) {
+                printf("E ");
+                prevY = node->src[1];
+            }
+            printf("-> (%d, %d) ", node->src[0], node->src[1]);
+        }
+    }
+
+ 
     graph_destroy(G);
     free(p);
     free(d);
