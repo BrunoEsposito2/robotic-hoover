@@ -345,7 +345,7 @@ void create_matr(int** arr, size_t rows, size_t cols) {
 Graph* graph_read_from_map(char* f, int** matrix, const int direction)
 {
     int n, m, nNodes;
-    int i, j, k, s; /* numero archi letti dal file */
+    int i, j, k; /* numero archi letti dal file */
     int** coordNodes;
     double weightDst;
     Graph* g;
@@ -376,7 +376,6 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
        sia uguale a quello dichiarato (m) */
 
     coordNodes = malloc(sizeof * coordNodes * n);
-
     create_matr(coordNodes, n, m);
 
     for (i = 0; i < n; i++) {
@@ -390,12 +389,11 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
     j = 1;
     k = 0;
     
-    while (i < n - 1 && j < m) {
+    while (i < n - 1 && j < m && k < nNodes) {
         if (j == m - 1) {
             j = 1;
             i++;
         }
-        s = k;
         if (i + 2 <= n - 1) { /* guardo a SUD */
             weightDst = setWeight(matrix, i + 1, j);
             if (weightDst > 0) {
@@ -444,7 +442,7 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i][j - 1], i, j, i, j - 1, weightDst);
             }
         }
-        k = s + 1;
+        k++;
         printf("K: %d \n", k);
         j++;
     }
@@ -548,31 +546,37 @@ int get_array_dim(const int* path, int n) {
 }
 
 void path_write_to_file(FILE* f, Graph* g, const int* path) {
-    int v, n, prevX = 1, prevY = 1;
+    int v, n, prevX = 1, prevY = 1, dim = 0;
 
     assert(path != NULL);
     assert(f != NULL);
 
     n = graph_n_nodes(g);
+    dim = get_array_dim(path, n);
 
-    fprintf(f, "%u\n", get_array_dim(path, n));
+    if (dim == 0) {
+        fprintf(f, "%d\n", (int) - 1);
+        return;
+    }
+
+    fprintf(f, "%u\n", dim);
     for (v = 0; v < n; v++) {
         if (path[v] > -1) {
             const Edge* node = graph_adj(g, v);
             if (node->src[0] > prevX && node->src[1] == prevY) {
-                fprintf(f, "->S ");
+                fprintf(f, "->S");
                 prevX = node->src[0];
             }
             else if (node->src[0] < prevX && node->src[1] == prevY) {
-                fprintf(f, "->N ");
+                fprintf(f, "->N");
                 prevX = node->src[0];
             }
             else if (node->src[1] < prevY && node->src[0] == prevX) {
-                fprintf(f, "->O ");
+                fprintf(f, "->O");
                 prevY = node->src[1];
             }
             else if (node->src[1] > prevY && node->src[0] == prevX) {
-                fprintf(f, "->E ");
+                fprintf(f, "->E");
                 prevY = node->src[1];
             }
         }

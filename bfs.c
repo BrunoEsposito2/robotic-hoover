@@ -339,26 +339,28 @@ int main(int argc, char* argv[])
     int* p, * d, *path;
     FILE* filein = stdin;
     FILE* fileout = stdout;
-    int src, n, directed = 1;
+    int src = 0, dst = 0, n, directed = 1;
+    char* outputFile;
 
-    if (argc != 3) {
-        fprintf(stderr, "Invocare il programma con: %s nodo_sorgente file_grafo\n", argv[0]);
+    if (argc != 4) {
+        fprintf(stderr, "Invocare il programma con: %s nodo_sorgente nodo_destinazione file_grafo\n", argv[0]);
         return EXIT_FAILURE;
     }
 
     src = atoi(argv[1]);
+    dst = atoi(argv[2]);
 
-    if (strcmp(argv[2], "-") != 0) {
-        filein = fopen(argv[2], "r");
+    if (strcmp(argv[3], "-") != 0) {
+        filein = fopen(argv[3], "r");
         if (filein == NULL) {
-            fprintf(stderr, "Can not open %s\n", argv[2]);
+            fprintf(stderr, "Can not open %s\n", argv[3]);
             return EXIT_FAILURE;
         }
     }
 
     matrix = matrix_from_file(filein);
 
-    G = graph_read_from_map(argv[2], matrix, directed);
+    G = graph_read_from_map(argv[3], matrix, directed);
     n = graph_n_nodes(G);
     
     assert((src >= 0) && (src < n));
@@ -375,11 +377,16 @@ int main(int argc, char* argv[])
     path = (int*)malloc(n * sizeof(*path)); assert(path != NULL);
 
     init_path_array(path, n);
-    get_path(src, 56, p, path);
+    get_path(src, dst, p, path);
 
-    fileout = fopen("test1.out", "w");
+    outputFile = (char*)malloc(sizeof(char) * strlen(argv[3]) + 1);
+    assert(outputFile != NULL);
+    outputFile = strncpy(outputFile, argv[3], sizeof(char) * strlen(argv[3]) - 2);
+    outputFile = strcat(outputFile, "out");
+
+    fileout = fopen(outputFile, "w");
     if (fileout == NULL) {
-        fprintf(stderr, "Can not open %s\n", argv[2]);
+        fprintf(stderr, "Can not open %s\n", outputFile);
         return EXIT_FAILURE;
     }
     /*graph_write_to_file(fileout, G);*/
@@ -392,7 +399,6 @@ int main(int argc, char* argv[])
     free(path);
     if (filein != stdin) fclose(filein);
     if (fileout != stdout) fclose(fileout);
-    
 
     return EXIT_SUCCESS;
 }
