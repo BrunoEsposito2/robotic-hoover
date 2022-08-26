@@ -379,8 +379,9 @@ int main(int argc, char* argv[])
     init_path_array(path, n);
     get_path(src, dst, p, path);
 
-    outputFile = (char*)malloc(sizeof(char) * strlen(argv[3]) + 1);
+    outputFile = (char*)malloc(strlen(argv[3]) + 1);
     assert(outputFile != NULL);
+    memset(outputFile, '\0', strlen(argv[3]));
     outputFile = strncpy(outputFile, argv[3], sizeof(char) * strlen(argv[3]) - 3);
     outputFile = strcat(outputFile, ".out");
 

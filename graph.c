@@ -564,19 +564,19 @@ void path_write_to_file(FILE* f, Graph* g, const int* path) {
         if (path[v] > -1) {
             const Edge* node = graph_adj(g, v);
             if (node->src[0] > prevX && node->src[1] == prevY) {
-                fprintf(f, "->S");
+                fprintf(f, "S");
                 prevX = node->src[0];
             }
             else if (node->src[0] < prevX && node->src[1] == prevY) {
-                fprintf(f, "->N");
+                fprintf(f, "N");
                 prevX = node->src[0];
             }
             else if (node->src[1] < prevY && node->src[0] == prevX) {
-                fprintf(f, "->O");
+                fprintf(f, "O");
                 prevY = node->src[1];
             }
             else if (node->src[1] > prevY && node->src[0] == prevX) {
-                fprintf(f, "->E");
+                fprintf(f, "E");
                 prevY = node->src[1];
             }
         }
