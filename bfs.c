@@ -330,24 +330,6 @@ void get_path(int s, int d, const int* p, int* path)
     }
 }
 
-int check_inputs(int** matrix, int src, int dst, Edge* node, int n) {
-    if (src < 0 || src > n) {
-        fprintf(stderr, "Invocare il programma correttamente: il nodo_sorgente %d inserito non e' valido \n", src);
-        fprintf(stderr, "Nota: in questo caso i nodi vanno da min 0 a max %d \n", n);
-        return EXIT_FAILURE;
-    }
-    if (dst < 0 || dst > n) {
-        fprintf(stderr, "Invocare il programma correttamente: il nodo_destinazione %d inserito non e' valido \n", dst);
-        fprintf(stderr, "Nota: in questo caso i nodi vanno da min 0 a max %d \n", n);
-        return EXIT_FAILURE;
-    }
-    if (setWeight(matrix, node->src[0], node->src[1]) < 0 || node == NULL) {
-        fprintf(stderr, "Errore: il nodo di partenza inserito %d non è calpestabile \n", src);
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
-}
-
 
 int main(int argc, char* argv[])
 {
