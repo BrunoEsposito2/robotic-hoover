@@ -381,8 +381,8 @@ int main(int argc, char* argv[])
 
     outputFile = (char*)malloc(sizeof(char) * strlen(argv[3]) + 1);
     assert(outputFile != NULL);
-    outputFile = strncpy(outputFile, argv[3], sizeof(char) * strlen(argv[3]) - 2);
-    outputFile = strcat(outputFile, "out");
+    outputFile = strncpy(outputFile, argv[3], sizeof(char) * strlen(argv[3]) - 3);
+    outputFile = strcat(outputFile, ".out");
 
     fileout = fopen(outputFile, "w");
     if (fileout == NULL) {
