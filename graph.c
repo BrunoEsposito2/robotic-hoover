@@ -552,9 +552,11 @@ int get_array_dim(const int* path, int n) {
     return dim;
 }
 
-void path_write_to_file(FILE* f, Graph* g, const List* path) {
-    int v, prevX = 1, prevY = 1, dim = 0;
-
+void path_write_to_file(FILE* f, Graph* g, const List* path, int src) {
+    int v, dim = 0;
+    const Edge* srcNode = graph_adj(g, src);
+    int prevX = srcNode->src[0];
+    int prevY = srcNode->src[1];
     
     assert(path != NULL);
     assert(f != NULL);
@@ -570,7 +572,7 @@ void path_write_to_file(FILE* f, Graph* g, const List* path) {
         return;
     }
 
-    fprintf(f, "%u\n", dim);
+    fprintf(f, "%u\n", dim - 1);
     for (v = 0; v < dim; v++) {
         const Edge* node = graph_adj(g, list_nth_element(path, v)->val);
         if (node->src[0] > prevX && node->src[1] == prevY) {

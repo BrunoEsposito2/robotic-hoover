@@ -399,7 +399,7 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
     /*graph_write_to_file(fileout, G);*/
-    path_write_to_file(fileout, G, path);
+    path_write_to_file(fileout, G, path, src);
  
     graph_destroy(G);
     free(matrix);

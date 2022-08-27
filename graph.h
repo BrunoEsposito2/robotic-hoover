@@ -97,6 +97,6 @@ void graph_write_to_file(FILE *f, const Graph *g);
 
 Graph* graph_read_from_map(char* f, int** matrix, const int direction);
 
-void path_write_to_file(FILE* f, Graph* g, const List* path);
+void path_write_to_file(FILE* f, Graph* g, const List* path, int src);
 
 #endif
