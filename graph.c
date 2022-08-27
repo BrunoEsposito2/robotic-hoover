@@ -347,7 +347,7 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
     int n, m, nNodes;
     int i, j, k; /* numero archi letti dal file */
     int** coordNodes;
-    double weightDst;
+    double weightSrc, weightDst;
     Graph* g;
     FILE* file = stdin;
     file = fopen(f, "r");
@@ -394,55 +394,63 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
             j = 1;
             i++;
         }
+        weightSrc = setWeight(matrix, i, j);
         if (i + 2 <= n - 1) { /* guardo a SUD */
             weightDst = setWeight(matrix, i + 1, j);
-            if (weightDst > 0) {
+            if (weightSrc > 0 && weightDst > 0) {
                 if (coordNodes[i][j] == -1) {
                     coordNodes[i][j] = k;
+                    k++;
                 } 
                 if (coordNodes[i + 1][j] == -1) {
                     coordNodes[i + 1][j] = k + 1;
+                    k += 2;
                 }
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i + 1][j], i, j, i + 1, j, weightDst);
             }
         }
         if (i - 2 >= 0) { /* guardo a OVEST */
             weightDst = setWeight(matrix, i - 1, j);
-            if (weightDst > 0) {
+            if (weightSrc > 0 && weightDst > 0) {
                 if (coordNodes[i][j] == -1) {
                     coordNodes[i][j] = k;
+                    k++;
                 }
                 if (coordNodes[i - 1][j] == -1) {
                     coordNodes[i - 1][j] = k + 1;
+                    k += 2;
                 }
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i - 1][j], i, j, i - 1, j, weightDst);
             }
         }   
         if (j + 2 <= m - 1) { /* guardo a EST */
             weightDst = setWeight(matrix, i, j + 1);
-            if (weightDst > 0) {
+            if (weightSrc > 0 && weightDst > 0) {
                 if (coordNodes[i][j] == -1) {
                     coordNodes[i][j] = k;
+                    k++;
                 }
                 if (coordNodes[i][j + 1] == -1) {
                     coordNodes[i][j + 1] = k + 1;
+                    k += 2;
                 } 
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i][j + 1], i, j, i, j + 1, weightDst);
             }
         }   
         if (j - 2 >= 0) { /* guardo a NORD */
             weightDst = setWeight(matrix, i, j - 1);
-            if (weightDst > 0) {
+            if (weightSrc > 0 && weightDst > 0) {
                 if (coordNodes[i][j] == -1) {
                     coordNodes[i][j] = k;
+                    k++;
                 }
                 if (coordNodes[i][j - 1] == -1) {
                     coordNodes[i][j - 1] = k + 1;
+                    k += 2;
                 } 
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i][j - 1], i, j, i, j - 1, weightDst);
             }
         }
-        k++;
         printf("K: %d \n", k);
         j++;
     }
@@ -545,14 +553,13 @@ int get_array_dim(const int* path, int n) {
     return dim;
 }
 
-void path_write_to_file(FILE* f, Graph* g, const int* path) {
-    int v, n, prevX = 1, prevY = 1, dim = 0;
+void path_write_to_file(FILE* f, Graph* g, const List* path) {
+    int v, prevX = 1, prevY = 1, dim = 0;
 
     assert(path != NULL);
     assert(f != NULL);
 
-    n = graph_n_nodes(g);
-    dim = get_array_dim(path, n);
+    dim = list_length(path);
 
     if (dim == 0) {
         fprintf(f, "%d\n", (int) - 1);
@@ -560,25 +567,23 @@ void path_write_to_file(FILE* f, Graph* g, const int* path) {
     }
 
     fprintf(f, "%u\n", dim);
-    for (v = 0; v < n; v++) {
-        if (path[v] > -1) {
-            const Edge* node = graph_adj(g, v);
-            if (node->src[0] > prevX && node->src[1] == prevY) {
-                fprintf(f, "S");
-                prevX = node->src[0];
-            }
-            else if (node->src[0] < prevX && node->src[1] == prevY) {
-                fprintf(f, "N");
-                prevX = node->src[0];
-            }
-            else if (node->src[1] < prevY && node->src[0] == prevX) {
-                fprintf(f, "O");
-                prevY = node->src[1];
-            }
-            else if (node->src[1] > prevY && node->src[0] == prevX) {
-                fprintf(f, "E");
-                prevY = node->src[1];
-            }
+    for (v = 0; v < dim; v++) {
+        const Edge* node = graph_adj(g, list_nth_element(path, v)->val);
+        if (node->src[0] > prevX && node->src[1] == prevY) {
+            fprintf(f, "S");
+            prevX = node->src[0];
+        }
+        else if (node->src[0] < prevX && node->src[1] == prevY) {
+            fprintf(f, "N");
+            prevX = node->src[0];
+        }
+        else if (node->src[1] < prevY && node->src[0] == prevX) {
+            fprintf(f, "O");
+            prevY = node->src[1];
+        }
+        else if (node->src[1] > prevY && node->src[0] == prevX) {
+            fprintf(f, "E");
+            prevY = node->src[1];
         }
     }
 }
