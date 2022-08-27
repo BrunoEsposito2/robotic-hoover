@@ -216,16 +216,12 @@ int bfs(const Graph* g,
         for (edge = graph_adj(g, u); edge != NULL; edge = edge->next) {
             const int v = edge->d;
             assert(u == edge->s); 
-            printf("VEDIAMO s: %d d: %d src(% d, % d) dst(% d, % d) \t ", edge->s, edge->d, edge->src[0], edge->src[1], edge->dst[0], edge->dst[1]);
             if (d[v] < 0 && edge->weight > -1) {
                 d[v] = d[u] + 1;
-                printf("d[%d] = %d \t weight: %.4f \t", v, d[v], edge->weight);
                 p[v] = u;
-                printf("p[v] = %d \n", p[v]);
                 list_add_last(l, v);
             }
         }
-        printf("\n");
     }
     list_destroy(l);
     return nvisited;
@@ -258,18 +254,23 @@ void print_path(int s, int d, const int* p)
    nell'albero corrispondente alla visita BFS. */
 void print_bfs(const Graph* g, int src, const int* d, const int* p)
 {
-    const int n = graph_n_nodes(g);
+    const int n = graph_n_nodes(g); 
+    const Edge* srcCoord;
     int v;
 
     assert(p != NULL);
     assert(d != NULL);
 
-    printf("  src | dest | distanza | path\n");
-    printf("------+------+----------+-------------------------\n");
+    printf("  src | coord(src) | dest | coord(dst) | distanza | path\n");
+    printf("------+------------+------+------------+----------+------\n");
+    srcCoord = graph_adj(g, src);
     for (v = 0; v < n; v++) {
-        printf(" %4d | %4d | %8d | ", src, v, d[v]);
-        print_path(src, v, p);
-        printf("\n");
+        const Edge* dstCoord = graph_adj(g, v);
+        if (dstCoord != NULL) {
+            printf(" %4d |  (%d, %d) | %4d | (%d, %d) | %8d | ", src, srcCoord->src[0], srcCoord->src[1], v, dstCoord->src[0], dstCoord->src[1], d[v]);
+            print_path(src, v, p);
+            printf("\n");
+        }        
     }
 }
 
@@ -293,7 +294,6 @@ int** matrix_from_file(FILE* f)
 
     assert(n >= 10);
     assert(m <= 1000);
-    printf("rows: %d \ncols: %d \n", n, m);
 
     matrix = malloc(sizeof * matrix * n);
     set_cols(matrix, n, m);
@@ -313,19 +313,27 @@ int** matrix_from_file(FILE* f)
 void get_path(int s, int d, const int* p, List* path)
 {
     if (s == d)
-        printf("%d", s);
+        list_add_first(path, d); /* nodo di partenza e nodo di arrivo corrispondono */
     else if (p[d] < 0)
-        printf("Non raggiungibile");
+        return; /* non raggiungibile */
     else {
         get_path(s, p[d], p, path);
         if (list_is_empty(path))
             list_add_first(path, d);
         else
             list_add_last(path, d);
-        printf("->%d", d);
     }
 }
 
+int find_node(Graph* g, int n, int x, int y) {
+    int i;
+    for (i = 0; i < n; i++) {
+        const Edge* node = graph_adj(g, i);
+        if (node->src[0] == x && node->src[1] == y)
+            return i;
+    }
+    return -1;
+}
 
 int main(int argc, char* argv[])
 {
@@ -362,7 +370,7 @@ int main(int argc, char* argv[])
 
     if (src < 0 || src > n) {
         fprintf(stderr, "Invocare il programma correttamente: il nodo_sorgente %d inserito non e' valido \n", src);
-        fprintf(stderr, "Nota: in questo caso i nodi vanno da min 0 a max %d \n", n);
+        fprintf(stderr, "Nota: in questo caso i nodi vanno da min 0 a max %d. \n", n);
         return EXIT_FAILURE;
     }
     if (dst < 0 || dst > n) {

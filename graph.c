@@ -451,7 +451,6 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i][j - 1], i, j, i, j - 1, weightDst);
             }
         }
-        printf("K: %d \n", k);
         j++;
     }
 
