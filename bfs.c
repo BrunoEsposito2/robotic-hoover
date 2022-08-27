@@ -310,22 +310,18 @@ int** matrix_from_file(FILE* f)
     return matrix;
 }
 
-void init_path_array(int* path, int dim) {
-    int i;
-    for (i = 0; i < dim; i++) {
-        path[i] = -1;
-    }
-}
-
-void get_path(int s, int d, const int* p, int* path)
+void get_path(int s, int d, const int* p, List* path)
 {
     if (s == d)
         printf("%d", s);
     else if (p[d] < 0)
         printf("Non raggiungibile");
     else {
-        path[d] = d;
         get_path(s, p[d], p, path);
+        if (list_is_empty(path))
+            list_add_first(path, d);
+        else
+            list_add_last(path, d);
         printf("->%d", d);
     }
 }
@@ -336,7 +332,8 @@ int main(int argc, char* argv[])
     Graph* G;
     int** matrix;
     int nvisited; /* n. di nodi raggiungibili dalla sorgente */
-    int* p, * d, *path;
+    int* p, * d;
+    List* path;
     FILE* filein = stdin;
     FILE* fileout = stdout;
     int src = 0, dst = 0, n, directed = 1;
@@ -383,9 +380,7 @@ int main(int argc, char* argv[])
     
     graph_print(G);
 
-    path = (int*)malloc(n * sizeof(*path)); assert(path != NULL);
-
-    init_path_array(path, n);
+    path = list_create();
     get_path(src, dst, p, path);
 
     outputFile = (char*)malloc(strlen(argv[3]) + 1);
