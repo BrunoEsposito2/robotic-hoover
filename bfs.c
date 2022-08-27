@@ -222,6 +222,7 @@ int bfs(const Graph* g,
                 list_add_last(l, v);
             }
         }
+        printf("\n");
     }
     list_destroy(l);
     return nvisited;
@@ -254,23 +255,18 @@ void print_path(int s, int d, const int* p)
    nell'albero corrispondente alla visita BFS. */
 void print_bfs(const Graph* g, int src, const int* d, const int* p)
 {
-    const int n = graph_n_nodes(g); 
-    const Edge* srcCoord;
+    const int n = graph_n_nodes(g);
     int v;
 
     assert(p != NULL);
     assert(d != NULL);
 
-    printf("  src | coord(src) | dest | coord(dst) | distanza | path\n");
-    printf("------+------------+------+------------+----------+------\n");
-    srcCoord = graph_adj(g, src);
+    printf("  src | dest | distanza | path\n");
+    printf("------+------+----------+-------------------------\n");
     for (v = 0; v < n; v++) {
-        const Edge* dstCoord = graph_adj(g, v);
-        if (dstCoord != NULL) {
-            printf(" %4d |  (%d, %d) | %4d | (%d, %d) | %8d | ", src, srcCoord->src[0], srcCoord->src[1], v, dstCoord->src[0], dstCoord->src[1], d[v]);
-            print_path(src, v, p);
-            printf("\n");
-        }        
+        printf(" %4d | %4d | %8d | ", src, v, d[v]);
+        print_path(src, v, p);
+        printf("\n");
     }
 }
 
@@ -313,9 +309,9 @@ int** matrix_from_file(FILE* f)
 void get_path(int s, int d, const int* p, List* path)
 {
     if (s == d)
-        list_add_first(path, d); /* nodo di partenza e nodo di arrivo corrispondono */
+        list_add_first(path, 0);
     else if (p[d] < 0)
-        return; /* non raggiungibile */
+        return;
     else {
         get_path(s, p[d], p, path);
         if (list_is_empty(path))

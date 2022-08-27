@@ -555,13 +555,18 @@ int get_array_dim(const int* path, int n) {
 void path_write_to_file(FILE* f, Graph* g, const List* path) {
     int v, prevX = 1, prevY = 1, dim = 0;
 
+    
     assert(path != NULL);
     assert(f != NULL);
 
     dim = list_length(path);
 
     if (dim == 0) {
-        fprintf(f, "%d\n", (int) - 1);
+        int val = list_nth_element(path, 0)->val;
+        if (val != 0)
+            fprintf(f, "%d\n", (int) -1);
+        else 
+            fprintf(f, "%d\n", val);
         return;
     }
 
