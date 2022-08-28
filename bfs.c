@@ -361,7 +361,7 @@ int main(int argc, char* argv[])
 
     matrix = matrix_from_file(filein);
 
-    G = graph_read_from_map(argv[3], matrix, directed);
+    G = graph_create_from_matrix(argv[3], matrix, directed);
     n = graph_n_nodes(G);
 
     if (src < 0 || src > n) {

@@ -336,59 +336,20 @@ double setWeight(int** matrix, int indX, int indY) {
     return 1; /* ritorno un valore minimo di peso */ 
 }
 
-void create_matr(int** arr, size_t rows, size_t cols) {
-    int i;
+void init_matrix(int** arr, size_t rows, size_t cols) {
+    int i, j;
     for (i = 0; i < rows; i++)
         arr[i] = malloc(sizeof * arr[i] * cols);
+
+    for (i = 0; i < rows; i++)
+        for (j = 0; j < cols; j++)
+            arr[i][j] = -1;
 }
 
-Graph* graph_read_from_map(char* f, int** matrix, const int direction)
-{
-    int n, m, nNodes;
-    int i, j, k; /* numero archi letti dal file */
-    int** coordNodes;
+void create_nodes(Graph* g, int n, int m, int** matrix, int** coordNodes, const int nNodes) {
+    int i = 1, j = 1, k = 0;
     double weightSrc, weightDst;
-    Graph* g;
-    FILE* file = stdin;
-    file = fopen(f, "r");
 
-    assert(file != NULL);
-
-    if (2 != fscanf(file, "%d %d ", &n, &m)) {
-        fprintf(stderr, "ERRORE durante la lettura dell'intestazione del grafo\n");
-        abort();
-    }
-
-    assert(n > 0);
-    assert(m >= 0);
-
-    nNodes = (n - 2) * (m - 2); /* calcolo il numero totale dei nodi del grado 
-                            considerando ognuno di dimensione 3x3 */
-
-    assert(nNodes > 0);
-    assert((direction == GRAPH_UNDIRECTED) || (direction == GRAPH_DIRECTED));
-
-    g = graph_create(nNodes, direction);
-    /* Ciclo di lettura degli archi. Per rendere il programma più
-       robusto, meglio non fidarsi del valore `m` nell'intestazione
-       dell'input. Leggiamo informazioni sugli archi fino a quando ne
-       troviamo, e poi controlliamo che il numero di archi letti (i)
-       sia uguale a quello dichiarato (m) */
-
-    coordNodes = malloc(sizeof * coordNodes * n);
-    create_matr(coordNodes, n, m);
-
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < m; j++) {
-            if (coordNodes)
-                coordNodes[i][j] = -1;
-        }
-    }
-
-    i = 1;
-    j = 1;
-    k = 0;
-    
     while (i < n - 1 && j < m && k < nNodes) {
         if (j == m - 1) {
             j = 1;
@@ -401,7 +362,7 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
                 if (coordNodes[i][j] == -1) {
                     coordNodes[i][j] = k;
                     k++;
-                } 
+                }
                 if (coordNodes[i + 1][j] == -1) {
                     coordNodes[i + 1][j] = k + 1;
                     k += 2;
@@ -422,7 +383,7 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
                 }
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i - 1][j], i, j, i - 1, j, weightDst);
             }
-        }   
+        }
         if (j + 2 <= m - 1) { /* guardo a EST */
             weightDst = setWeight(matrix, i, j + 1);
             if (weightSrc > 0 && weightDst > 0) {
@@ -433,10 +394,10 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
                 if (coordNodes[i][j + 1] == -1) {
                     coordNodes[i][j + 1] = k + 1;
                     k += 2;
-                } 
+                }
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i][j + 1], i, j, i, j + 1, weightDst);
             }
-        }   
+        }
         if (j - 2 >= 0) { /* guardo a NORD */
             weightDst = setWeight(matrix, i, j - 1);
             if (weightSrc > 0 && weightDst > 0) {
@@ -447,16 +408,44 @@ Graph* graph_read_from_map(char* f, int** matrix, const int direction)
                 if (coordNodes[i][j - 1] == -1) {
                     coordNodes[i][j - 1] = k + 1;
                     k += 2;
-                } 
+                }
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i][j - 1], i, j, i, j - 1, weightDst);
             }
         }
         j++;
     }
+}
 
-    /*if (i != nNodes - 1) {
-        fprintf(stderr, "WARNING: ho letto %d archi, ma l'intestazione ne dichiara %d\n", i, m);
-    }*/
+Graph* graph_create_from_matrix(char* f, int** matrix, const int direction)
+{
+    int n, m, nNodes;
+    int** coordNodes;
+    Graph* g;
+    FILE* file = stdin;
+    file = fopen(f, "r");
+
+    assert(file != NULL);
+
+    if (2 != fscanf(file, "%d %d ", &n, &m)) {
+        fprintf(stderr, "ERRORE durante la lettura dell'intestazione del grafo\n");
+        abort();
+    }
+
+    assert(n > 0);
+    assert(m >= 0);
+
+    nNodes = (n - 2) * (m - 2); /* calcolo il numero totale dei nodi del grado
+                            considerando ognuno di dimensione 3x3 */
+
+    assert(nNodes > 0);
+    assert((direction == GRAPH_UNDIRECTED) || (direction == GRAPH_DIRECTED));
+
+    g = graph_create(nNodes, direction);
+
+    coordNodes = malloc(sizeof * coordNodes * n);
+    init_matrix(coordNodes, n, m);
+
+    create_nodes(g, n, m, matrix, coordNodes, nNodes);
 
     /*
     fprintf(stderr, "INFO: Letto grafo %s con %d nodi e %d archi\n",
