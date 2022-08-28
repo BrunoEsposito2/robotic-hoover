@@ -86,10 +86,6 @@ int graph_in_degree(const Graph *g, int v);
 /* Stampa il grafo a video */
 void graph_print(const Graph *g);
 
-/* Crea un nuovo grafo leggendone il contenuto dal file `f`. Il file `f`
-   deve essere già stato aperto in lettura. */
-Graph *graph_read_from_file(FILE *f);
-
 /* Salva il grafo `g` sul file `f`, con lo stesso formato usato dalla
    funzione `graph_read_from_file()`. Il file `f` deve essere già
    stato aperto in scrittura. */

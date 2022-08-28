@@ -245,9 +245,11 @@ void graph_add_edge(Graph* g, int src, int dst, int srcX, int srcY, int dstX, in
 
     assert(g != NULL);
 
+    assert((src >= 0) && (src < graph_n_nodes(g)));
     assert((srcX >= 0) && (srcX < graph_n_nodes(g)));
     assert((srcY >= 0) && (srcY < graph_n_nodes(g)));
 
+    assert((dst >= 0) && (dst < graph_n_nodes(g)));
     assert((dstX >= 0) && (dstX < graph_n_nodes(g)));
     assert((dstY >= 0) && (dstY < graph_n_nodes(g)));
 
@@ -333,7 +335,7 @@ double setWeight(int** matrix, int indX, int indY) {
             }
         }
     }
-    return 1; /* ritorno un valore minimo di peso */ 
+    return 1; /* ritorno il valore valido di peso */ 
 }
 
 void init_matrix(int** arr, size_t rows, size_t cols) {
@@ -447,55 +449,6 @@ Graph* graph_create_from_matrix(char* f, int** matrix, const int direction)
 
     create_nodes(g, n, m, matrix, coordNodes, nNodes);
 
-    /*
-    fprintf(stderr, "INFO: Letto grafo %s con %d nodi e %d archi\n",
-            (t == GRAPH_UNDIRECTED) ? "non orientato" : "orientato",
-            n,
-            m);
-    */
-
-    return g;
-}
-
-
-Graph* graph_read_from_file(FILE* f)
-{
-    int n, m, t;
-    int src, dst;
-    int i; /* numero archi letti dal file */
-    double weight;
-    Graph* g;
-
-    assert(f != NULL);
-
-    if (3 != fscanf(f, "%d %d %d", &n, &m, &t)) {
-        fprintf(stderr, "ERRORE durante la lettura dell'intestazione del grafo\n");
-        abort();
-    };
-    assert(n > 0);
-    assert(m >= 0);
-    assert((t == GRAPH_UNDIRECTED) || (t == GRAPH_DIRECTED));
-
-    g = graph_create(n, t);
-    /* Ciclo di lettura degli archi. Per rendere il programma più
-       robusto, meglio non fidarsi del valore `m` nell'intestazione
-       dell'input. Leggiamo informazioni sugli archi fino a quando ne
-       troviamo, e poi controlliamo che il numero di archi letti (i)
-       sia uguale a quello dichiarato (m) */
-    i = 0;
-    while (3 == fscanf(f, "%d %d %lf", &src, &dst, &weight)) {
-        /* graph_add_edge(g, src, dst, weight); */
-        i++;
-    }
-    if (i != m) {
-        fprintf(stderr, "WARNING: ho letto %d archi, ma l'intestazione ne dichiara %d\n", i, m);
-    }
-    /*
-    fprintf(stderr, "INFO: Letto grafo %s con %d nodi e %d archi\n",
-            (t == GRAPH_UNDIRECTED) ? "non orientato" : "orientato",
-            n,
-            m);
-    */
     return g;
 }
 
