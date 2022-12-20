@@ -168,8 +168,6 @@
     della lista dei padri non esiste. */
 const int NODE_UNDEF = -1;
 
-typedef enum { WHITE, GREY, BLACK } Color; /* colori dei nodi */
-
 /* Visita il grafo g usando l'algoritmo di visita in ampiezza (BFS)
    partendo dal nodo sorgente s. Restituisce il numero di nodi
    visitati (incluso s). */
@@ -270,12 +268,18 @@ void print_bfs(const Graph* g, int src, const int* d, const int* p)
     }
 }
 
+/*
+* Crea le colonne di una matrice (rows x cols)
+*/
 void set_cols(int** arr, size_t rows, size_t cols) {
     int i;
     for (i = 0; i < rows; i++)
         arr[i] = malloc(sizeof * arr[i] * cols);
 }
 
+/*
+* Inizializza la matrice con i valori letti da un file
+*/
 int** matrix_from_file(FILE* f)
 {
     int **matrix, retValue, i, j, n, m;
@@ -298,7 +302,7 @@ int** matrix_from_file(FILE* f)
         for (j = 0; j < m; j++) {
             retValue = fscanf(f, "%c ", &c);
             if (matrix && retValue == 1 && c != '\n') {
-                matrix[i][j] = c;   /* inizializzo la matrice con i valori letti dal file */
+                matrix[i][j] = c;   /* inizializzo la matrice con ciascun valore letto dal file */
             }
         }
     }
@@ -306,6 +310,10 @@ int** matrix_from_file(FILE* f)
     return matrix;
 }
 
+/*
+* Restituisce il percorso a partire da una sorgente 's' 
+* fino ad una destinazione 'd' tramite una lista 
+*/
 void get_path(int s, int d, const int* p, List* path)
 {
     if (s == d)
@@ -321,16 +329,10 @@ void get_path(int s, int d, const int* p, List* path)
     }
 }
 
-int find_node(Graph* g, int n, int x, int y) {
-    int i;
-    for (i = 0; i < n; i++) {
-        const Edge* node = graph_adj(g, i);
-        if (node->src[0] == x && node->src[1] == y)
-            return i;
-    }
-    return -1;
-}
-
+/* 
+* il programma prende in input: nodo_sorgente nodo_destinazione nome_file
+* Esempio: ./bfs 0 49 test1.in
+*/
 int main(int argc, char* argv[])
 {
     Graph* G;
@@ -347,10 +349,13 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Invocare il programma con: %s nodo_sorgente nodo_destinazione file_grafo\n", argv[0]);
         return EXIT_FAILURE;
     }
+    
+    /* inizializzo una variabile con il nodo sorgente specificato */ 
+    src = atoi(argv[1]); 
+    /* inizializzo una variabile con il nodo destinazione specificato */
+    dst = atoi(argv[2]); 
 
-    src = atoi(argv[1]);
-    dst = atoi(argv[2]);
-
+    /* controllo sul nome del file passato in input */ 
     if (strcmp(argv[3], "-") != 0) {
         filein = fopen(argv[3], "r");
         if (filein == NULL) {
@@ -359,11 +364,14 @@ int main(int argc, char* argv[])
         }
     }
 
+    /* inizializzo una variabile con la matrice avente i valori letti dal file */
     matrix = matrix_from_file(filein);
 
+    /* creo il grafo che servirà per l'algoritmo a partire dalla matrice */
     G = graph_create_from_matrix(argv[3], matrix, directed);
     n = graph_n_nodes(G);
 
+    /* controllo dei valori indicati come sorgente e destinazione */
     if (src < 0 || src > n) {
         fprintf(stderr, "Invocare il programma correttamente: il nodo_sorgente %d inserito non e' valido \n", src);
         fprintf(stderr, "Nota: in questo caso i nodi vanno da min 0 a max %d. \n", n);
@@ -378,28 +386,35 @@ int main(int argc, char* argv[])
     p = (int*)malloc(n * sizeof(*p)); assert(p != NULL);
     d = (int*)malloc(n * sizeof(*d)); assert(d != NULL);
     nvisited = bfs(G, src, d, p);
-    print_bfs(G, src, d, p);
+    /* Stampa di debug */
+    /* print_bfs(G, src, d, p); */
 
     printf("# %d nodi su %d raggiungibili dalla sorgente %d\n", nvisited, n, src);
     
-    graph_print(G);
-
+    /* Stampa di debug */
+    /* graph_print(G); */
+    
+    /* inserisco in una variabile il percorso più breve trovato */
     path = list_create();
     get_path(src, dst, p, path);
 
+    /* creo il file di output in cui andrò a scrivere il percorso trovato */
     outputFile = (char*)malloc(strlen(argv[3]) + 1);
     assert(outputFile != NULL);
     memset(outputFile, '\0', strlen(argv[3]));
     outputFile = strncpy(outputFile, argv[3], sizeof(char) * strlen(argv[3]) - 3);
     outputFile = strcat(outputFile, ".out");
 
+    /* scrivo nel file di output il percorso trovato */
     fileout = fopen(outputFile, "w");
     if (fileout == NULL) {
         fprintf(stderr, "Can not open %s\n", outputFile);
         return EXIT_FAILURE;
     }
     path_write_to_file(fileout, G, path, src);
+    printf("File %s creato.\n", outputFile);
  
+    /* libero dalla memoria tutte le variabili utilizzate dal programma */
     graph_destroy(G);
     free(matrix);
     free(p);

@@ -1,0 +1,10 @@
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(496,5): warning MSB8003: la proprietà WindowsSDKDir non è definita. È possibile che alcuni strumenti di compilazione non siano stati trovati.
+  bfs.c
+C:\Users\bruno\source\repos\ProgettoAlgoritmi\ProgettoAlgoritmi\bfs.c(157,10): fatal error C1083: Non è possibile aprire il file inclusione: 'stdio.h': No such file or directory
+  graph.c
+C:\Users\bruno\source\repos\ProgettoAlgoritmi\ProgettoAlgoritmi\graph.c(137,10): fatal error C1083: Non è possibile aprire il file inclusione: 'stdio.h': No such file or directory
+  list.c
+C:\Users\bruno\source\repos\ProgettoAlgoritmi\ProgettoAlgoritmi\list.c(145,10): fatal error C1083: Non è possibile aprire il file inclusione: 'stdio.h': No such file or directory
+  queue.c
+C:\Users\bruno\source\repos\ProgettoAlgoritmi\ProgettoAlgoritmi\queue.c(129,10): fatal error C1083: Non è possibile aprire il file inclusione: 'stdio.h': No such file or directory
+  Generazione del codice in corso...

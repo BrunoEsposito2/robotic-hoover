@@ -197,9 +197,13 @@ static Edge* new_edge(int src, int dst, int srcX, int srcY, int dstX, int dstY, 
 
     edge->s = src;
     edge->d = dst;
-    edge->src[0] = srcX;
+    /* aggiungo la coordinata x della sorgente */
+    edge->src[0] = srcX; 
+    /* aggiungo la coordinata y della sorgente */
     edge->src[1] = srcY;
+    /* aggiungo la coordinata x della destinazione */
     edge->dst[0] = dstX;
+    /* aggiungo la coordinata y della destinazione */
     edge->dst[1] = dstY;
     edge->weight = weight;
     edge->next = next;
@@ -326,6 +330,7 @@ void graph_print(const Graph* g)
     }
 }
 
+/* funzione utilizzata per determinare i valori dei pesi di ogni nodo */
 double setWeight(int** matrix, int indX, int indY) {
     int i, j;
     for (i = indX - 1; i <= indX + 1; i++) {
@@ -338,6 +343,7 @@ double setWeight(int** matrix, int indX, int indY) {
     return 1; /* ritorno il valore valido di peso */ 
 }
 
+/* inizializza una matrice con un valore uguale per ogni cella (-1) */
 void init_matrix(int** arr, size_t rows, size_t cols) {
     int i, j;
     for (i = 0; i < rows; i++)
@@ -348,19 +354,24 @@ void init_matrix(int** arr, size_t rows, size_t cols) {
             arr[i][j] = -1;
 }
 
+/* utilizzo la matrice ricavata dal file per creare ciascun nodo del grafo */
 void create_nodes(Graph* g, int n, int m, int** matrix, int** coordNodes, const int nNodes) {
     int i = 1, j = 1, k = 0;
     double weightSrc, weightDst;
 
     while (i < n - 1 && j < m && k < nNodes) {
+        /* reinizializzo il valore j per le colonne */
         if (j == m - 1) {
             j = 1;
             i++;
         }
+        /* prendo il valore del peso della sorgente */
         weightSrc = setWeight(matrix, i, j);
-        if (i + 2 <= n - 1) { /* guardo a SUD */
+        if (i + 2 <= n - 1) { /* guardo a SUD del nodo corrente */
+            /* prendo il valore del peso della destinazione (SUD) */
             weightDst = setWeight(matrix, i + 1, j);
             if (weightSrc > 0 && weightDst > 0) {
+                /* effettuo dei controlli sui pesi trovati */
                 if (coordNodes[i][j] == -1) {
                     coordNodes[i][j] = k;
                     k++;
@@ -369,12 +380,15 @@ void create_nodes(Graph* g, int n, int m, int** matrix, int** coordNodes, const 
                     coordNodes[i + 1][j] = k + 1;
                     k += 2;
                 }
+                /* aggiungo il nodo con i valori aggiornati della matrice */
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i + 1][j], i, j, i + 1, j, weightDst);
             }
         }
-        if (i - 2 >= 0) { /* guardo a OVEST */
+        if (i - 2 >= 0) { /* guardo a NORD del nodo corrente */
+            /* prendo il valore del peso della destinazione (NORD) */
             weightDst = setWeight(matrix, i - 1, j);
             if (weightSrc > 0 && weightDst > 0) {
+                /* effettuo dei controlli sui pesi trovati */
                 if (coordNodes[i][j] == -1) {
                     coordNodes[i][j] = k;
                     k++;
@@ -383,12 +397,15 @@ void create_nodes(Graph* g, int n, int m, int** matrix, int** coordNodes, const 
                     coordNodes[i - 1][j] = k + 1;
                     k += 2;
                 }
+                /* aggiungo il nodo con i valori aggiornati della matrice */
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i - 1][j], i, j, i - 1, j, weightDst);
             }
         }
-        if (j + 2 <= m - 1) { /* guardo a EST */
+        if (j + 2 <= m - 1) { /* guardo a EST del nodo corrente */
+            /* prendo il valore del peso della destinazione (EST) */
             weightDst = setWeight(matrix, i, j + 1);
             if (weightSrc > 0 && weightDst > 0) {
+                /* effettuo dei controlli sui pesi trovati */
                 if (coordNodes[i][j] == -1) {
                     coordNodes[i][j] = k;
                     k++;
@@ -397,12 +414,15 @@ void create_nodes(Graph* g, int n, int m, int** matrix, int** coordNodes, const 
                     coordNodes[i][j + 1] = k + 1;
                     k += 2;
                 }
+                /* aggiungo il nodo con i valori aggiornati della matrice */
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i][j + 1], i, j, i, j + 1, weightDst);
             }
         }
-        if (j - 2 >= 0) { /* guardo a NORD */
+        if (j - 2 >= 0) { /* guardo a OVEST del nodo corrente */
+            /* prendo il valore del peso della destinazione (OVEST) */
             weightDst = setWeight(matrix, i, j - 1);
             if (weightSrc > 0 && weightDst > 0) {
+                /* effettuo dei controlli sui pesi trovati */
                 if (coordNodes[i][j] == -1) {
                     coordNodes[i][j] = k;
                     k++;
@@ -411,6 +431,7 @@ void create_nodes(Graph* g, int n, int m, int** matrix, int** coordNodes, const 
                     coordNodes[i][j - 1] = k + 1;
                     k += 2;
                 }
+                /* aggiungo il nodo con i valori aggiornati della matrice */
                 graph_add_edge(g, coordNodes[i][j], coordNodes[i][j - 1], i, j, i, j - 1, weightDst);
             }
         }
@@ -418,6 +439,7 @@ void create_nodes(Graph* g, int n, int m, int** matrix, int** coordNodes, const 
     }
 }
 
+/* crea un grafo a partire dalla matrice ricavata dalla lettura di un file */
 Graph* graph_create_from_matrix(char* f, int** matrix, const int direction)
 {
     int n, m, nNodes;
@@ -485,6 +507,7 @@ void graph_write_to_file(FILE* f, const Graph* g)
     }
 }
 
+/* restituisce la dimensione dell'array passato in input */
 int get_array_dim(const int* path, int n) {
     int i, dim = 0;
     for (i = 0; i < n; i++) {
@@ -494,6 +517,7 @@ int get_array_dim(const int* path, int n) {
     return dim;
 }
 
+/* stampa il percorso su un file */
 void path_write_to_file(FILE* f, Graph* g, const List* path, int src) {
     int v, dim = 0;
     const Edge* srcNode = graph_adj(g, src);

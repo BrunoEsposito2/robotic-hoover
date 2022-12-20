@@ -91,8 +91,10 @@ void graph_print(const Graph *g);
    stato aperto in scrittura. */
 void graph_write_to_file(FILE *f, const Graph *g);
 
+/* crea un grafo a partire dalla matrice ricavata dalla lettura di un file */
 Graph* graph_create_from_matrix(char* f, int** matrix, const int direction);
 
+/* stampa il percorso su un file */
 void path_write_to_file(FILE* f, Graph* g, const List* path, int src);
 
 #endif
